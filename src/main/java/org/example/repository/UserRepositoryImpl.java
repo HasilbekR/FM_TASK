@@ -1,6 +1,6 @@
 package org.example.repository;
 
-import org.example.domain.model.UserEntity;
+import org.example.domain.model.user.UserEntity;
 import org.example.utils.BeanUtil;
 
 import java.sql.Connection;

@@ -2,7 +2,8 @@ package org.example.service;
 
 import org.example.domain.dto.LoginDto;
 import org.example.domain.dto.UserRequestDto;
-import org.example.domain.model.UserEntity;
+import org.example.domain.model.user.UserEntity;
+import org.example.domain.model.user.UserRole;
 import org.example.exception.AuthenticationFailedException;
 import org.example.exception.UniqueObjectException;
 import org.example.repository.UserRepository;
@@ -25,7 +26,7 @@ public class UserService {
     public void signUp(UserRequestDto userRequestDto) {
         if(userRepository.getByUsername(userRequestDto.getUsername()) != null) throw new UniqueObjectException("Username already exists");
         if(userRepository.getByEmail(userRequestDto.getEmail()) != null) throw new UniqueObjectException("Email already exists");
-        UserEntity userEntity = new UserEntity(userRequestDto.getUsername(), userRequestDto.getEmail(), userRequestDto.getPassword(), false);
+        UserEntity userEntity = new UserEntity(userRequestDto.getUsername(), userRequestDto.getEmail(), userRequestDto.getPassword(), false, UserRole.USER);
         userRepository.save(userEntity);
     }
 }
