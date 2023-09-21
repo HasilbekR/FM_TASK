@@ -8,7 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.domain.dto.LoginDto;
 import org.example.domain.dto.UserRequestDto;
-import org.example.domain.model.UserEntity;
+import org.example.domain.model.user.UserEntity;
 import org.example.service.UserService;
 
 import java.io.IOException;

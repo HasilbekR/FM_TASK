@@ -1,7 +1,8 @@
-package org.example.domain.model;
+package org.example.domain.model.user;
 
 import lombok.*;
 import lombok.experimental.Accessors;
+import org.example.domain.model.BaseModel;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -12,11 +13,12 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserEntity extends BaseModel{
+public class UserEntity extends BaseModel {
     private String username;
     private String email;
     private String password;
     private Boolean isVerified;
+    private UserRole role;
     public static UserEntity map(ResultSet resultSet) {
         try {
             UserEntity userEntity  = new UserEntity()
@@ -40,6 +42,7 @@ public class UserEntity extends BaseModel{
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 ", isVerified=" + isVerified +
+                ", role=" + role +
                 '}';
     }
 }
