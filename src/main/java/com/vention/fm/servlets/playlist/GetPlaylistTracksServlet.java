@@ -18,6 +18,7 @@ import java.util.UUID;
 public class GetPlaylistTracksServlet extends HttpServlet {
     private final PlaylistTracksService playlistTracksService = new PlaylistTracksService();
     private final ObjectMapper objectMapper = Utils.getObjectMapper();
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String playlistId = req.getParameter("playlistId");

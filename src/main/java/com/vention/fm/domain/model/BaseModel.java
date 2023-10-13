@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
+
 @Data
 public abstract class BaseModel {
     {
@@ -13,6 +14,7 @@ public abstract class BaseModel {
         updatedDate = LocalDateTime.now();
         isBlocked = false;
     }
+
     protected UUID id;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     protected LocalDateTime createdDate;

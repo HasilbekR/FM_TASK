@@ -2,6 +2,7 @@ package com.vention.fm.repository.album_tracks;
 
 import com.vention.fm.domain.model.album.AlbumTracks;
 import com.vention.fm.exception.DataNotFoundException;
+import com.vention.fm.utils.DatabaseUtils;
 import com.vention.fm.utils.Utils;
 import com.vention.fm.utils.ResultSetMapper;
 
@@ -13,17 +14,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
-public class AlbumTracksRepositoryImpl implements AlbumTracksRepository{
+public class AlbumTracksRepositoryImpl implements AlbumTracksRepository {
     private final Connection connection = Utils.getConnection();
 
     @Override
     public void save(AlbumTracks albumTracks) {
-        try{
+        try {
             PreparedStatement preparedStatement = connection.prepareStatement(INSERT);
-            preparedStatement.setObject(1, albumTracks.getId());
-            preparedStatement.setObject(2, albumTracks.getCreatedDate());
-            preparedStatement.setObject(3, albumTracks.getUpdatedDate());
-            preparedStatement.setObject(4, albumTracks.getIsBlocked());
+            DatabaseUtils.setValues(preparedStatement, albumTracks);
             preparedStatement.setObject(5, albumTracks.getAlbumId());
             preparedStatement.setObject(6, albumTracks.getTrackId());
             preparedStatement.setInt(7, albumTracks.getTrackPosition());
@@ -40,7 +38,7 @@ public class AlbumTracksRepositoryImpl implements AlbumTracksRepository{
             preparedStatement.setObject(1, albumId);
             ResultSet resultSet = preparedStatement.executeQuery();
             List<AlbumTracks> albumTracks = new LinkedList<>();
-            while (resultSet.next()){
+            while (resultSet.next()) {
                 albumTracks.add(ResultSetMapper.mapAlbumTracks(resultSet));
             }
             return albumTracks;
@@ -51,16 +49,6 @@ public class AlbumTracksRepositoryImpl implements AlbumTracksRepository{
 
     @Override
     public int getCount(UUID albumId) {
-        try{
-            PreparedStatement preparedStatement = connection.prepareStatement(GET_COUNT);
-            preparedStatement.setObject(1, albumId);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            if(resultSet.next()){
-                return resultSet.getInt(1);
-            }
-            throw new DataNotFoundException("Album not found");
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        return DatabaseUtils.getData(albumId, connection, GET_COUNT);
     }
 }

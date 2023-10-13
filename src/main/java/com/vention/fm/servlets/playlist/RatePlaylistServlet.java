@@ -15,8 +15,9 @@ import java.util.UUID;
 public class RatePlaylistServlet extends HttpServlet {
     private final PlaylistService playlistService = new PlaylistService();
     private final PlaylistRatingService playlistRatingService = new PlaylistRatingService();
+
     @Override
-    protected void doPut(HttpServletRequest req, HttpServletResponse resp){
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) {
         UUID playlistId = UUID.fromString(req.getParameter("playlistId"));
         UUID userId = UUID.fromString(req.getParameter("userId"));
         Boolean isLiked = Boolean.parseBoolean(req.getParameter("isLiked"));
@@ -34,7 +35,7 @@ public class RatePlaylistServlet extends HttpServlet {
             }
         }
         // if user has not rated playlist then new rating is created
-        catch (DataNotFoundException e){
+        catch (DataNotFoundException e) {
             PlaylistRating playlistRating = PlaylistRating.builder()
                     .playlistId(playlistId)
                     .userId(userId)

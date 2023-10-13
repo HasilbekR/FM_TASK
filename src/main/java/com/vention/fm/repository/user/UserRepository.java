@@ -16,7 +16,9 @@ public interface UserRepository {
     String GET_ALL_USERS = "select * from users where is_blocked = ?";
 
     UserEntity getByUsername(String username);
+
     UserEntity getByEmail(String email);
+
     void save(UserEntity userEntity);
 
     String getUserRole(UUID userId);

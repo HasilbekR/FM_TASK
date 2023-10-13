@@ -11,10 +11,16 @@ public interface PlaylistRatingRepository {
     String GET = "select * from playlist_rating where playlist_id = ? and user_id = ?";
     String GET_LIKE_COUNT = "select count(*) from playlist_rating where playlist_id = ? and is_liked = true";
     String GET_DISLIKE_COUNT = "select count(*) from playlist_rating where playlist_id = ? and is_liked = false";
+
     void save(PlaylistRating playlistRating);
+
     void update(UUID playlistId, UUID userId, Boolean isLiked);
+
     void delete(UUID playlistId, UUID userId);
+
     PlaylistRating get(UUID playlistId, UUID userId);
+
     int getLikeCount(UUID playlistId);
+
     int getDislikeCount(UUID playlistId);
 }

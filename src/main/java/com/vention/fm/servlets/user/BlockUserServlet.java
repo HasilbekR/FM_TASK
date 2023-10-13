@@ -18,6 +18,7 @@ import java.util.UUID;
 public class BlockUserServlet extends HttpServlet {
     private final ObjectMapper objectMapper = Utils.getObjectMapper();
     private final UserService userService = new UserService();
+
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         UserBlockDto userBlockDto = objectMapper.readValue(req.getReader(), UserBlockDto.class);

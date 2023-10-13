@@ -23,5 +23,6 @@ public class GetPlaylistByNameServlet extends HttpServlet {
         String userId = req.getParameter("userId");
         String json = objectMapper.writeValueAsString(playlistService.getByName(name, UUID.fromString(userId)));
         resp.getWriter().print(json);
+
     }
 }

@@ -2,6 +2,7 @@ package com.vention.fm.repository.playlist;
 
 import com.vention.fm.domain.model.playlist.Playlist;
 import com.vention.fm.exception.DataNotFoundException;
+import com.vention.fm.utils.DatabaseUtils;
 import com.vention.fm.utils.Utils;
 import com.vention.fm.utils.ResultSetMapper;
 
@@ -14,15 +15,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class PlaylistRepositoryImpl implements PlaylistRepository{
+public class PlaylistRepositoryImpl implements PlaylistRepository {
     private final Connection connection = Utils.getConnection();
+
     @Override
     public Playlist getPlaylistByName(String name) {
-        try{
+        try {
             PreparedStatement preparedStatement = connection.prepareStatement(GET_BY_NAME);
             preparedStatement.setString(1, name);
             ResultSet resultSet = preparedStatement.executeQuery();
-            if(resultSet.next()){
+            if (resultSet.next()) {
                 return ResultSetMapper.mapPlaylist(resultSet);
             }
         } catch (SQLException e) {
@@ -37,7 +39,7 @@ public class PlaylistRepositoryImpl implements PlaylistRepository{
             PreparedStatement preparedStatement = connection.prepareStatement(GET_BY_ID);
             preparedStatement.setObject(1, id);
             ResultSet resultSet = preparedStatement.executeQuery();
-            if(resultSet.next()){
+            if (resultSet.next()) {
                 return ResultSetMapper.mapPlaylist(resultSet);
             }
         } catch (SQLException e) {
@@ -48,11 +50,11 @@ public class PlaylistRepositoryImpl implements PlaylistRepository{
 
     @Override
     public List<Playlist> getAvailablePlaylists() {
-        try{
-        PreparedStatement preparedStatement = connection.prepareStatement(GET_AVAILABLE_PLAYLISTS);
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(GET_AVAILABLE_PLAYLISTS);
             ResultSet resultSet = preparedStatement.executeQuery();
             List<Playlist> playlists = new ArrayList<>();
-            while (resultSet.next()){
+            while (resultSet.next()) {
                 playlists.add(ResultSetMapper.mapPlaylist(resultSet));
             }
             return playlists;
@@ -63,12 +65,9 @@ public class PlaylistRepositoryImpl implements PlaylistRepository{
 
     @Override
     public void save(Playlist playlist) {
-        try{
+        try {
             PreparedStatement preparedStatement = connection.prepareStatement(INSERT);
-            preparedStatement.setObject(1, playlist.getId());
-            preparedStatement.setObject(2, playlist.getCreatedDate());
-            preparedStatement.setObject(3, playlist.getUpdatedDate());
-            preparedStatement.setBoolean(4, playlist.getIsBlocked());
+            DatabaseUtils.setValues(preparedStatement, playlist);
             preparedStatement.setString(5, playlist.getName());
             preparedStatement.setBoolean(6, playlist.getIsPublic());
             preparedStatement.setInt(7, playlist.getLikeCount());
@@ -82,7 +81,7 @@ public class PlaylistRepositoryImpl implements PlaylistRepository{
 
     @Override
     public void delete(UUID id) {
-        try{
+        try {
             PreparedStatement preparedStatement = connection.prepareStatement(DELETE);
             preparedStatement.setObject(1, id);
             preparedStatement.executeUpdate();
@@ -93,7 +92,7 @@ public class PlaylistRepositoryImpl implements PlaylistRepository{
 
     @Override
     public void rate(int likeCount, int dislikeCount, UUID playlistId) {
-        try{
+        try {
             PreparedStatement preparedStatement = connection.prepareStatement(RATE);
             preparedStatement.setObject(1, LocalDateTime.now());
             preparedStatement.setInt(2, likeCount);
@@ -112,7 +111,7 @@ public class PlaylistRepositoryImpl implements PlaylistRepository{
             preparedStatement.setObject(1, ownerId);
             ResultSet resultSet = preparedStatement.executeQuery();
             List<Playlist> playlists = new ArrayList<>();
-            while (resultSet.next()){
+            while (resultSet.next()) {
                 playlists.add(ResultSetMapper.mapPlaylist(resultSet));
             }
             return playlists;
@@ -123,7 +122,7 @@ public class PlaylistRepositoryImpl implements PlaylistRepository{
 
     @Override
     public void update(Playlist playlist) {
-        try{
+        try {
             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE);
             preparedStatement.setObject(1, playlist.getUpdatedDate());
             preparedStatement.setString(2, playlist.getName());

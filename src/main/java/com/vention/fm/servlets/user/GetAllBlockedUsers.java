@@ -19,6 +19,7 @@ import java.util.UUID;
 public class GetAllBlockedUsers extends HttpServlet {
     private final UserService userService = new UserService();
     private final ObjectMapper objectMapper = Utils.getObjectMapper();
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String adminId = req.getParameter("adminId");

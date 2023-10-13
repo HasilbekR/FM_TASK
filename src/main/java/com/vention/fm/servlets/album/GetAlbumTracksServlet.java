@@ -21,12 +21,13 @@ public class GetAlbumTracksServlet extends HttpServlet {
     private final AlbumTracksService albumTracksService = new AlbumTracksService();
     private final AlbumService albumService = new AlbumService();
     private final ObjectMapper objectMapper = Utils.getObjectMapper();
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String albumId = req.getParameter("albumId");
         String ownerId = req.getParameter("ownerId");
         UUID ownerId1 = albumService.getOwnerId(UUID.fromString(albumId));
-        if(!ownerId.equals(ownerId1.toString())) throw new AccessDeniedException("Access denied");
+        if (!ownerId.equals(ownerId1.toString())) throw new AccessDeniedException("Access denied");
 
         List<AlbumTracks> albumTracks = albumTracksService.getAlbumTracks(UUID.fromString(albumId));
         resp.getWriter().print(objectMapper.writeValueAsString(albumTracks));

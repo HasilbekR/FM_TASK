@@ -12,10 +12,15 @@ public interface PlaylistTracksRepository {
     String REMOVE_TRACK = "DeleteAlbumServlet from playlist_tracks where id =?";
     String GET_BY_ID = "select * from playlist_tracks where id =?";
     String DELETE = "DeleteAlbumServlet from playlist_tracks where playlist_id =?";
+
     void save(PlaylistTracks playlist);
+
     void delete(UUID playlistId);
+
     PlaylistTracks getById(UUID playlistTrackId);
+
     int countPlaylistTracks(UUID playlistId);
+
     void removeTrack(UUID playlistTrackId);
 
     List<PlaylistTracks> getPlaylistTracks(UUID playlistId);

@@ -22,7 +22,6 @@ public class BlockTrackServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         TrackBlockDto trackBlockDto = objectMapper.readValue(req.getReader(), TrackBlockDto.class);
         AdminVerifier.verifyAdmin(trackBlockDto.getAdminId());
-
         trackService.blockTrack(true, trackBlockDto.getTrackId());
     }
 }

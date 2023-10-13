@@ -61,8 +61,8 @@ public class Utils {
             Properties properties = new Properties();
             InputStream inputStream = Utils.class.getClassLoader().getResourceAsStream("loader.properties");
             properties.load(inputStream);
-            if(Objects.equals(request, "/url")) return properties.getProperty("LOADER_URL");
-           } catch (IOException e) {
+            if (Objects.equals(request, "/url")) return properties.getProperty("LOADER_URL");
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
         throw new DataNotFoundException("Invalid request");

@@ -16,13 +16,21 @@ public interface TrackRepository {
     String GET_ARTIST_ID = "select artist_id from tracks where id = ?";
     String IS_BLOCKED = "select is_blocked from tracks where id =?";
     String BLOCK_TRACK = "update tracks set is_blocked = ? where id = ?";
+
     List<Track> searchTracksByName(String name);
+
     Track getTrackByName(String name);
+
     List<Track> getTrackListByArtist(UUID artistId);
+
     List<Track> getAll();
+
     Track getTrackByNameAndArtist(String name, UUID artistId);
+
     void save(Track track);
+
     void update(Track track);
+
     UUID getArtistId(UUID trackId);
 
     Boolean isBlocked(UUID trackId);

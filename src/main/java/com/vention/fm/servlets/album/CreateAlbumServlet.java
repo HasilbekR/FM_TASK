@@ -16,6 +16,7 @@ public class CreateAlbumServlet extends HttpServlet {
 
     private final ObjectMapper objectMapper = Utils.getObjectMapper();
     private final AlbumService albumService = new AlbumService();
+
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         AlbumCreateDto albumCreateDto = objectMapper.readValue(req.getReader(), AlbumCreateDto.class);

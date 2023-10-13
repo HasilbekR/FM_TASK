@@ -20,20 +20,21 @@ public class PlaylistTracksService {
     public List<PlaylistTracks> getPlaylistTracks(UUID playlistId, UUID ownerId) throws AccessDeniedException {
         Playlist playlistById = playlistService.getPlaylistById(playlistId);
         Boolean isOwner = playlistById.getOwnerId().equals(ownerId);
-        if(isOwner || playlistById.getIsPublic()) return playlistTracksRepository.getPlaylistTracks(playlistId);
+        if (isOwner || playlistById.getIsPublic()) return playlistTracksRepository.getPlaylistTracks(playlistId);
         throw new AccessDeniedException("Access denied");
     }
+
     public void addPlaylist(PlaylistAddTrackDto track) throws AccessDeniedException {
         UUID trackId = track.getTrackId();
         Boolean isBlocked = trackService.isBlocked(trackId);
-        if(isBlocked) throw new AccessDeniedException("Blocked tracks cannot be added into playlist");
+        if (isBlocked) throw new AccessDeniedException("Blocked tracks cannot be added into playlist");
 
         Playlist playlistById = playlistService.getPlaylistById(track.getPlaylistId());
         if (playlistById.getOwnerId().equals(track.getOwnerId())) {
             int position = playlistTracksRepository.countPlaylistTracks(track.getPlaylistId()) + 1;
             PlaylistTracks playlistTracks = new PlaylistTracks(track.getPlaylistId(), track.getTrackId(), position);
             playlistTracksRepository.save(playlistTracks);
-        }else {
+        } else {
             throw new AuthenticationFailedException("Access denied to the playlist");
         }
     }
@@ -43,11 +44,12 @@ public class PlaylistTracksService {
         Playlist playlistById = playlistService.getPlaylistById(playlistTracks.getPlaylistId());
         if (playlistById.getOwnerId().equals(playlistTrackDto.getOwnerId())) {
             playlistTracksRepository.removeTrack(playlistTrackDto.getTrackInPlaylistId());
-        }else {
+        } else {
             throw new AuthenticationFailedException("Access denied to the playlist");
         }
     }
-    public void delete(UUID playlistId){
+
+    public void delete(UUID playlistId) {
         playlistTracksRepository.delete(playlistId);
     }
 }

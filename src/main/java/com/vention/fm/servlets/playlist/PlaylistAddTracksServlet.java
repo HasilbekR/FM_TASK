@@ -15,6 +15,7 @@ import java.io.IOException;
 public class PlaylistAddTracksServlet extends HttpServlet {
     private final PlaylistTracksService playlistTracksService = new PlaylistTracksService();
     private final ObjectMapper objectMapper = Utils.getObjectMapper();
+
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         PlaylistAddTrackDto playlistTrack = objectMapper.readValue(req.getReader(), PlaylistAddTrackDto.class);

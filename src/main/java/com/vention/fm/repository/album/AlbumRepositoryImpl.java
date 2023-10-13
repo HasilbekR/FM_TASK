@@ -2,6 +2,7 @@ package com.vention.fm.repository.album;
 
 import com.vention.fm.domain.model.album.Album;
 import com.vention.fm.exception.DataNotFoundException;
+import com.vention.fm.utils.DatabaseUtils;
 import com.vention.fm.utils.Utils;
 import com.vention.fm.utils.ResultSetMapper;
 
@@ -13,16 +14,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public class AlbumRepositoryImpl implements AlbumRepository{
+public class AlbumRepositoryImpl implements AlbumRepository {
     private final Connection connection = Utils.getConnection();
+
     @Override
     public Album getByName(String name, UUID ownerId) {
-        try{
+        try {
             PreparedStatement preparedStatement = connection.prepareStatement(GET_BY_NAME);
             preparedStatement.setString(1, name);
             preparedStatement.setObject(2, ownerId);
             ResultSet resultSet = preparedStatement.executeQuery();
-            if(resultSet.next()){
+            if (resultSet.next()) {
                 return ResultSetMapper.mapAlbum(resultSet);
             }
         } catch (SQLException e) {
@@ -33,12 +35,12 @@ public class AlbumRepositoryImpl implements AlbumRepository{
 
     @Override
     public List<Album> getAll(UUID ownerId) {
-        try{
+        try {
             PreparedStatement preparedStatement = connection.prepareStatement(GET_ALL);
             preparedStatement.setObject(1, ownerId);
             ResultSet resultSet = preparedStatement.executeQuery();
             List<Album> albums = new ArrayList<>();
-            while(resultSet.next()){
+            while (resultSet.next()) {
                 albums.add(ResultSetMapper.mapAlbum(resultSet));
             }
             return albums;
@@ -49,12 +51,9 @@ public class AlbumRepositoryImpl implements AlbumRepository{
 
     @Override
     public void save(Album album) {
-        try{
+        try {
             PreparedStatement preparedStatement = connection.prepareStatement(INSERT);
-            preparedStatement.setObject(1, album.getId());
-            preparedStatement.setObject(2, album.getCreatedDate());
-            preparedStatement.setObject(3, album.getUpdatedDate());
-            preparedStatement.setBoolean(4, album.getIsBlocked());
+            DatabaseUtils.setValues(preparedStatement, album);
             preparedStatement.setString(5, album.getName());
             preparedStatement.setObject(6, album.getArtistId());
             preparedStatement.setObject(7, album.getOwnerId());
@@ -76,7 +75,7 @@ public class AlbumRepositoryImpl implements AlbumRepository{
 
     @Override
     public void delete(UUID albumId) {
-        try{
+        try {
             PreparedStatement preparedStatement = connection.prepareStatement(DELETE);
             preparedStatement.setObject(1, albumId);
             preparedStatement.executeUpdate();
@@ -86,11 +85,13 @@ public class AlbumRepositoryImpl implements AlbumRepository{
     }
 
     private UUID getId(UUID albumId, String query) {
-        try{
+        try {
             PreparedStatement preparedStatement = connection.prepareStatement(query);
             preparedStatement.setObject(1, albumId);
             ResultSet resultSet = preparedStatement.executeQuery();
-            if(resultSet.next()){return resultSet.getObject(1, UUID.class);}
+            if (resultSet.next()) {
+                return resultSet.getObject(1, UUID.class);
+            }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

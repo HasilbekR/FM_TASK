@@ -15,6 +15,7 @@ import java.io.IOException;
 public class GetAllTracksServlet extends HttpServlet {
     private final TrackService trackService = new TrackService();
     private final ObjectMapper objectMapper = Utils.getObjectMapper();
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String json = objectMapper.writeValueAsString(trackService.getAll());

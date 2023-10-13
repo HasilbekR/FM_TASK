@@ -17,6 +17,7 @@ public class SaveTrackServlet extends HttpServlet {
 
     private final TrackService trackService = new TrackService();
     private final ObjectMapper objectMapper = Utils.getObjectMapper();
+
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         TrackSaveDto trackDto = objectMapper.readValue(req.getReader(), TrackSaveDto.class);

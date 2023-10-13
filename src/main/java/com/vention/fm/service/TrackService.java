@@ -49,7 +49,8 @@ public class TrackService {
             return trackRepository.getTrackByNameAndArtist(track.getName(), track.getArtist().getId());
         }
     }
-    public Track createTrack(TrackSaveDto trackSaveDto){
+
+    public Track createTrack(TrackSaveDto trackSaveDto) {
         Track track = Track.builder()
                 .name(trackSaveDto.getName())
                 .url(trackSaveDto.getUrl())

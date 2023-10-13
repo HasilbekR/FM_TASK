@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 
 @WebFilter("/*")
-public class GlobalExceptionHandler implements Filter {
+public class ExceptionFilter implements Filter {
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -40,7 +40,7 @@ public class GlobalExceptionHandler implements Filter {
             jsonResponse.put("error message", e.getMessage());
 
             response.getWriter().write(jsonResponse.toString());
-        } catch (DataNotFoundException e){
+        } catch (DataNotFoundException e) {
             httpResponse.setStatus(HttpServletResponse.SC_NOT_FOUND);
             httpResponse.setContentType("application/json");
 
@@ -50,6 +50,7 @@ public class GlobalExceptionHandler implements Filter {
             response.getWriter().write(jsonResponse.toString());
         }
     }
+
     @Override
     public void destroy() {
         Filter.super.destroy();

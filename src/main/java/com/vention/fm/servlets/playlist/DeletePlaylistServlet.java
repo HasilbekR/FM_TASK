@@ -12,6 +12,7 @@ import java.util.UUID;
 @WebServlet(urlPatterns = "/playlist/DeleteAlbumServlet")
 public class DeletePlaylistServlet extends HttpServlet {
     private final PlaylistService playlistService = new PlaylistService();
+
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         UUID playlistId = UUID.fromString(req.getParameter("playlistId"));

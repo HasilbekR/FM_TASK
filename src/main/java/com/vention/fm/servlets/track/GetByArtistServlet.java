@@ -15,6 +15,7 @@ import java.io.IOException;
 public class GetByArtistServlet extends HttpServlet {
     private final TrackService trackService = new TrackService();
     private final ObjectMapper objectMapper = Utils.getObjectMapper();
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String name = req.getParameter("name");

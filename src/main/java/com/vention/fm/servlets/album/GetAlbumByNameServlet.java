@@ -18,6 +18,7 @@ public class GetAlbumByNameServlet extends HttpServlet {
 
     private final ObjectMapper objectMapper = Utils.getObjectMapper();
     private final AlbumService albumService = new AlbumService();
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String name = req.getParameter("name");

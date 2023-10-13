@@ -23,5 +23,6 @@ public class BlockArtistServlet extends HttpServlet {
         ArtistBlockDto artistBlockDto = objectMapper.readValue(req.getReader(), ArtistBlockDto.class);
         AdminVerifier.verifyAdmin(artistBlockDto.getAdminId());
         artistService.blockArtist(true, artistBlockDto.getArtistId());
+
     }
 }

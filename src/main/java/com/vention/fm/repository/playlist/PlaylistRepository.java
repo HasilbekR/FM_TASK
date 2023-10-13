@@ -16,10 +16,15 @@ public interface PlaylistRepository {
     String RATE = "UPDATE playlists SET updated_date=?, like_count = ?, dislike_count = ? where id=?";
 
     Playlist getPlaylistByName(String name);
+
     Playlist getPlaylistById(UUID id);
+
     List<Playlist> getAvailablePlaylists();
+
     void save(Playlist playlist);
+
     void delete(UUID id);
+
     void rate(int likeCount, int dislikeCount, UUID playlistId);
 
     List<Playlist> getAllByOwnerId(UUID ownerId);

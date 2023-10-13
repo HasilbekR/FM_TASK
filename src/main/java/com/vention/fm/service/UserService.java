@@ -29,17 +29,17 @@ public class UserService {
         UserEntity userEntity = new UserEntity();
         //first checks for username if it exists using try catch,
         // if not the username is given in catch block as repository throws exception if data not found
-        try{
+        try {
             if (userRepository.getByUsername(userRequestDto.getUsername()) != null)
                 throw new UniqueObjectException("Username already exists");
-        }catch (DataNotFoundException e){
+        } catch (DataNotFoundException e) {
             userEntity.setUsername(userRequestDto.getUsername());
         }
         //the same logic for email
-        try{
+        try {
             if (userRepository.getByEmail(userRequestDto.getEmail()) != null)
                 throw new UniqueObjectException("Email already exists");
-        }catch (DataNotFoundException e){
+        } catch (DataNotFoundException e) {
             userEntity.setEmail(userRequestDto.getEmail());
         }
         if (userRequestDto.getPassword().isEmpty()) throw new DataNotFoundException("Password cannot be null");
@@ -48,19 +48,24 @@ public class UserService {
         userEntity.setRole(UserRole.USER);
         userRepository.save(userEntity);
     }
-    public String getUserRole(UUID userId){
+
+    public String getUserRole(UUID userId) {
         return userRepository.getUserRole(userId);
     }
-    public Boolean isBlocked(UUID userId){
+
+    public Boolean isBlocked(UUID userId) {
         return userRepository.isBlocked(userId);
     }
-    public void blockUser(Boolean isBlocked, UUID userId){
+
+    public void blockUser(Boolean isBlocked, UUID userId) {
         userRepository.blockUser(isBlocked, userId);
     }
-    public List<UserEntity> getAllActiveUsers(){
+
+    public List<UserEntity> getAllActiveUsers() {
         return userRepository.getAllUsers(false);
     }
-    public List<UserEntity> getAllBlockedUsers(){
+
+    public List<UserEntity> getAllBlockedUsers() {
         return userRepository.getAllUsers(true);
     }
 }

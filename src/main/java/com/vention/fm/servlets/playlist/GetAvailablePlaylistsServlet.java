@@ -20,5 +20,6 @@ public class GetAvailablePlaylistsServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String json = objectMapper.writeValueAsString(playlistService.getAvailablePlaylists());
         resp.getWriter().print(json);
+
     }
 }

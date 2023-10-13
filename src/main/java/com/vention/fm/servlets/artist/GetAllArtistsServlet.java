@@ -15,6 +15,7 @@ import java.io.IOException;
 public class GetAllArtistsServlet extends HttpServlet {
     private final ObjectMapper objectMapper = Utils.getObjectMapper();
     private final ArtistService artistService = new ArtistService();
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String json = objectMapper.writeValueAsString(artistService.getAll());

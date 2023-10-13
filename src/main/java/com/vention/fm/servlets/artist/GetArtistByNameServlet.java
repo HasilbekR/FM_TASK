@@ -15,6 +15,7 @@ import java.io.IOException;
 public class GetArtistByNameServlet extends HttpServlet {
     private final ArtistService artistService = new ArtistService();
     private final ObjectMapper objectMapper = Utils.getObjectMapper();
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String name = req.getParameter("name");

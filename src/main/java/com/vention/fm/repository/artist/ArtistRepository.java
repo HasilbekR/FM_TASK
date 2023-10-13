@@ -16,14 +16,24 @@ public interface ArtistRepository {
     String GET_LISTENERS = "select listeners from artists where id = ?";
     String BLOCK_ARTIST = "update artists set is_blocked = ? where id = ?";
     String IS_BLOCKED = "select is_blocked from artists where id = ?";
+
     Artist getArtistByName(String name);
+
     UUID getIdByName(String name);
+
     List<Artist> getAll();
+
     void save(Artist artist);
+
     void update(Artist artist);
+
     Artist getArtistById(UUID id);
+
     void blockArtist(Boolean isBlocked, UUID artistId);
+
     int getPlayCount(UUID artistId);
+
     int getListeners(UUID artistId);
+
     Boolean isBlocked(UUID artistId);
 }

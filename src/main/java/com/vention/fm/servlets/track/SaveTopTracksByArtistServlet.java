@@ -19,16 +19,17 @@ import java.util.UUID;
 public class SaveTopTracksByArtistServlet extends HttpServlet {
     private final TrackService trackService = new TrackService();
     private final ObjectMapper objectMapper = Utils.getObjectMapper();
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String userId = req.getParameter("userId");
         AdminVerifier.verifyAdmin(UUID.fromString(userId));
 
         String page = req.getParameter("page");
-        if(page == null) page = "1";
+        if (page == null) page = "1";
         String artist = req.getParameter("artist");
         String encodedArtist = URLEncoder.encode(artist, StandardCharsets.UTF_8);
-        String apiUrl = Utils.url("/url")+"/track/save-top-tracks-by-artist?artist="+encodedArtist+"&page="+page;
+        String apiUrl = Utils.url("/url") + "/track/save-top-tracks-by-artist?artist=" + encodedArtist + "&page=" + page;
         SaveTopTracksServlet.getTracks(resp, apiUrl, objectMapper, trackService);
     }
 }

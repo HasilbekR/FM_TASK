@@ -18,6 +18,7 @@ import java.util.UUID;
 public class GetAllAlbumsServlet extends HttpServlet {
     private final ObjectMapper objectMapper = Utils.getObjectMapper();
     private final AlbumService albumService = new AlbumService();
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String ownerId = req.getParameter("ownerId");

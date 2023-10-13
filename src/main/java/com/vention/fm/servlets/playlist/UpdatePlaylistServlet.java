@@ -15,6 +15,7 @@ import java.io.IOException;
 public class UpdatePlaylistServlet extends HttpServlet {
     private final PlaylistService playlistService = new PlaylistService();
     private final ObjectMapper objectMapper = Utils.getObjectMapper();
+
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         PlaylistUpdateDto playlistDto = objectMapper.readValue(req.getReader(), PlaylistUpdateDto.class);

@@ -2,6 +2,7 @@ package com.vention.fm.repository.user;
 
 import com.vention.fm.domain.model.user.UserEntity;
 import com.vention.fm.exception.DataNotFoundException;
+import com.vention.fm.utils.DatabaseUtils;
 import com.vention.fm.utils.Utils;
 import com.vention.fm.utils.ResultSetMapper;
 
@@ -12,6 +13,7 @@ import java.util.UUID;
 
 public class UserRepositoryImpl implements UserRepository {
     private final Connection connection = Utils.getConnection();
+
     @Override
     public UserEntity getByUsername(String username) {
         return getUserEntity(username, GET_BY_USERNAME);
@@ -27,7 +29,7 @@ public class UserRepositoryImpl implements UserRepository {
             PreparedStatement preparedStatement = connection.prepareStatement(getByEmail);
             preparedStatement.setString(1, email);
             ResultSet resultSet = preparedStatement.executeQuery();
-            if(resultSet.next()) {
+            if (resultSet.next()) {
                 return ResultSetMapper.mapUser(resultSet);
             }
         } catch (SQLException e) {
@@ -40,10 +42,7 @@ public class UserRepositoryImpl implements UserRepository {
     public void save(UserEntity userEntity) {
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(INSERT);
-            preparedStatement.setObject(1, userEntity.getId());
-            preparedStatement.setObject(2, userEntity.getCreatedDate());
-            preparedStatement.setObject(3, userEntity.getUpdatedDate());
-            preparedStatement.setBoolean(4,userEntity.getIsBlocked());
+            DatabaseUtils.setValues(preparedStatement, userEntity);
             preparedStatement.setString(5, userEntity.getUsername());
             preparedStatement.setString(6, userEntity.getEmail());
             preparedStatement.setString(7, userEntity.getPassword());
@@ -57,11 +56,11 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public String getUserRole(UUID userId) {
-        try{
+        try {
             PreparedStatement preparedStatement = connection.prepareStatement(GET_USER_ROLE);
             preparedStatement.setObject(1, userId);
             ResultSet resultSet = preparedStatement.executeQuery();
-            if(resultSet.next()) {
+            if (resultSet.next()) {
                 return resultSet.getString(1);
             }
         } catch (SQLException e) {
@@ -72,34 +71,17 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public Boolean isBlocked(UUID userId) {
-        try{
-            PreparedStatement preparedStatement = connection.prepareStatement(IS_BLOCKED);
-            preparedStatement.setObject(1, userId);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            if(resultSet.next()) {
-                return resultSet.getBoolean(1);
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        throw new DataNotFoundException("User not found");
+        return DatabaseUtils.isBlocked(userId, connection, IS_BLOCKED);
     }
 
     @Override
     public void blockUser(Boolean isBlocked, UUID userId) {
-        try{
-            PreparedStatement preparedStatement = connection.prepareStatement(BLOCK_USER);
-            preparedStatement.setObject(1, isBlocked);
-            preparedStatement.setObject(2, userId);
-            preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        DatabaseUtils.block(isBlocked, userId, connection, BLOCK_USER);
     }
 
     @Override
     public List<UserEntity> getAllUsers(Boolean isBlocked) {
-        try{
+        try {
             PreparedStatement preparedStatement = connection.prepareStatement(GET_ALL_USERS);
             preparedStatement.setObject(1, isBlocked);
             ResultSet resultSet = preparedStatement.executeQuery();

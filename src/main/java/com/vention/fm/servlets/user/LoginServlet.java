@@ -16,6 +16,7 @@ import java.io.IOException;
 public class LoginServlet extends HttpServlet {
     private final UserService userService = new UserService();
     private final ObjectMapper objectMapper = Utils.getObjectMapper();
+
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         LoginDto loginDto = objectMapper.readValue(req.getReader(), LoginDto.class);

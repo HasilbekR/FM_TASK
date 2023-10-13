@@ -25,14 +25,15 @@ public class SaveTopTracksServlet extends HttpServlet {
 
     private final TrackService trackService = new TrackService();
     private final ObjectMapper objectMapper = Utils.getObjectMapper();
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String userId = req.getParameter("userId");
         AdminVerifier.verifyAdmin(UUID.fromString(userId));
 
         String page = req.getParameter("page");
-        if(page == null) page = "1";
-        String apiUrl = Utils.url("/url")+"/track/save-top-tracks?page="+page;
+        if (page == null) page = "1";
+        String apiUrl = Utils.url("/url") + "/track/save-top-tracks?page=" + page;
         getTracks(resp, apiUrl, objectMapper, trackService);
     }
 
@@ -44,8 +45,9 @@ public class SaveTopTracksServlet extends HttpServlet {
 
         int responseCode = connection.getResponseCode();
         if (responseCode == HttpURLConnection.HTTP_OK) {
-            try(BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-                List<Track> tracks = objectMapper.readValue(reader, new TypeReference<>() {});
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+                List<Track> tracks = objectMapper.readValue(reader, new TypeReference<>() {
+                });
                 List<Track> savedTracks = trackService.saveAll(tracks);
                 String json = objectMapper.writeValueAsString(savedTracks);
                 resp.getWriter().print(json);

@@ -1,7 +1,7 @@
 package com.vention.fm.exception;
 
-public class DataNotFoundException extends RuntimeException{
-    public DataNotFoundException(String message){
+public class DataNotFoundException extends RuntimeException {
+    public DataNotFoundException(String message) {
         super(message);
     }
 

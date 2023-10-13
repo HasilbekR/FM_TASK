@@ -22,5 +22,6 @@ public class GetUserPlaylistsServlet extends HttpServlet {
         String ownerId = req.getParameter("ownerId");
         String json = objectMapper.writeValueAsString(playlistService.getAllByOwnerId(UUID.fromString(ownerId)));
         resp.getWriter().print(json);
+
     }
 }

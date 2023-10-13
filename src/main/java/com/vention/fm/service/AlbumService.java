@@ -14,9 +14,11 @@ public class AlbumService {
     private final AlbumRepository albumRepository = new AlbumRepositoryImpl();
     private final UserService userService = new UserService();
     private final ArtistService artistService = new ArtistService();
+
     public Album getAlbumByName(String name, UUID ownerId) {
         return albumRepository.getByName(name, ownerId);
     }
+
     public List<Album> getAll(UUID ownerId) {
         return albumRepository.getAll(ownerId);
     }
@@ -24,25 +26,29 @@ public class AlbumService {
     public void save(AlbumCreateDto albumCreateDto) throws AccessDeniedException {
         UUID ownerId = albumCreateDto.getOwnerId();
         Boolean isBlocked = userService.isBlocked(ownerId);
-        if(isBlocked) throw new AccessDeniedException("Blocked users are not allowed to create a new album");
+        if (isBlocked) throw new AccessDeniedException("Blocked users are not allowed to create a new album");
 
         Artist artistByName = artistService.getArtistByName(albumCreateDto.getArtist());
         Boolean isArtistBlocked = artistService.isBlocked(artistByName.getId());
-        if(isArtistBlocked) throw new AccessDeniedException("Blocked artists cannot be added into albums");
+        if (isArtistBlocked) throw new AccessDeniedException("Blocked artists cannot be added into albums");
 
-        Album album = new Album(albumCreateDto.getName(), artistByName.getId(),albumCreateDto.getOwnerId());
+        Album album = new Album(albumCreateDto.getName(), artistByName.getId(), albumCreateDto.getOwnerId());
         albumRepository.save(album);
     }
-    public UUID getArtistId(UUID albumId){
+
+    public UUID getArtistId(UUID albumId) {
         return albumRepository.getArtistId(albumId);
     }
-    public UUID getOwnerId(UUID albumId){return albumRepository.getOwnerId(albumId);}
+
+    public UUID getOwnerId(UUID albumId) {
+        return albumRepository.getOwnerId(albumId);
+    }
 
     public void delete(String albumId, String ownerId) throws AccessDeniedException {
         UUID ownerId1 = albumRepository.getOwnerId(UUID.fromString(albumId));
-        if(ownerId1.toString().equals(ownerId)){
+        if (ownerId1.toString().equals(ownerId)) {
             albumRepository.delete(UUID.fromString(albumId));
-        }else {
+        } else {
             throw new AccessDeniedException("Access denied");
         }
     }

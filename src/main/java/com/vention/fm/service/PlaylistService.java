@@ -22,24 +22,27 @@ public class PlaylistService {
 
     public Playlist getByName(String name, UUID userId) {
         Playlist playlistByName = playlistRepository.getPlaylistByName(name);
-        if(playlistByName.getOwnerId().equals(userId)){
+        if (playlistByName.getOwnerId().equals(userId)) {
             return playlistByName;
         } else if (playlistByName.getIsPublic()) {
             return playlistByName;
-        }else{
-            throw new DataNotFoundException("Playlist "+name+" not found");
+        } else {
+            throw new DataNotFoundException("Playlist " + name + " not found");
         }
     }
-    public List<Playlist> getAvailablePlaylists(){
+
+    public List<Playlist> getAvailablePlaylists() {
         return playlistRepository.getAvailablePlaylists();
     }
+
     public List<Playlist> getAllByOwnerId(UUID ownerId) {
         return playlistRepository.getAllByOwnerId(ownerId);
     }
+
     public void save(PlaylistCreateDto playlistDto) throws AccessDeniedException {
         UUID ownerId = playlistDto.getOwnerId();
         Boolean isBlocked = userService.isBlocked(ownerId);
-        if(isBlocked) throw new AccessDeniedException("Blocked users are not allowed to create a new playlist");
+        if (isBlocked) throw new AccessDeniedException("Blocked users are not allowed to create a new playlist");
         Playlist playlist = Playlist.builder()
                 .name(playlistDto.getName())
                 .isPublic(playlistDto.getIsPublic())
@@ -52,30 +55,34 @@ public class PlaylistService {
 
     /**
      * this method updates playlist's rating columns, whenever the playlist is rated, this method is called
+     *
      * @param playlistId - the playlist
      */
-    public void rate(UUID playlistId){
+    public void rate(UUID playlistId) {
         int likeCount = playlistRatingService.getLikeCount(playlistId);
         int dislikeCount = playlistRatingService.getDislikeCount(playlistId);
-        playlistRepository.rate(likeCount, dislikeCount,playlistId);
+        playlistRepository.rate(likeCount, dislikeCount, playlistId);
     }
+
     public void delete(UUID playlistId, UUID ownerId) throws AccessDeniedException {
         Playlist playlistById = playlistRepository.getPlaylistById(playlistId);
-        if(playlistById.getOwnerId().equals(ownerId)){
+        if (playlistById.getOwnerId().equals(ownerId)) {
             playlistRepository.delete(playlistById.getId());
-        }else {
+        } else {
             throw new AccessDeniedException("You do not have access to DeleteAlbumServlet this playlist");
         }
     }
+
     public void update(PlaylistUpdateDto playlistDto) throws AccessDeniedException {
         Playlist playlistById = playlistRepository.getPlaylistById(playlistDto.getId());
-        if(!playlistById.getOwnerId().equals(playlistDto.getOwnerId()))
+        if (!playlistById.getOwnerId().equals(playlistDto.getOwnerId()))
             throw new AccessDeniedException("You do not have access to update this playlist");
         modelMapper.map(playlistDto, playlistById);
         playlistById.setUpdatedDate(LocalDateTime.now());
         playlistRepository.update(playlistById);
     }
-    public Playlist getPlaylistById(UUID playlistId){
+
+    public Playlist getPlaylistById(UUID playlistId) {
         return playlistRepository.getPlaylistById(playlistId);
     }
 }

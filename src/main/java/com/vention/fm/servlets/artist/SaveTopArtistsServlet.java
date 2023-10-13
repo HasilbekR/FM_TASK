@@ -25,14 +25,15 @@ public class SaveTopArtistsServlet extends HttpServlet {
 
     private final ArtistService artistService = new ArtistService();
     private final ObjectMapper objectMapper = Utils.getObjectMapper();
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String userId = req.getParameter("userId");
         AdminVerifier.verifyAdmin(UUID.fromString(userId));
 
         String page = req.getParameter("page");
-        if(page == null) page = "1";
-        String apiUrl = Utils.url("/url")+"/artist/save-top-artists?page="+page;
+        if (page == null) page = "1";
+        String apiUrl = Utils.url("/url") + "/artist/save-top-artists?page=" + page;
         URL url = new URL(apiUrl);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("GET");
@@ -40,8 +41,9 @@ public class SaveTopArtistsServlet extends HttpServlet {
 
         int responseCode = connection.getResponseCode();
         if (responseCode == HttpURLConnection.HTTP_OK) {
-            try(BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-                List<Artist> artists = objectMapper.readValue(reader, new TypeReference<>() {});
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+                List<Artist> artists = objectMapper.readValue(reader, new TypeReference<>() {
+                });
                 List<Artist> savedArtists = artistService.saveAll(artists);
                 String json = objectMapper.writeValueAsString(savedArtists);
                 resp.getWriter().print(json);

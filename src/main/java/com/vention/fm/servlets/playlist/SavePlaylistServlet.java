@@ -20,5 +20,6 @@ public class SavePlaylistServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         PlaylistCreateDto playlistDto = objectMapper.readValue(req.getReader(), PlaylistCreateDto.class);
         playlistService.save(playlistDto);
+
     }
 }

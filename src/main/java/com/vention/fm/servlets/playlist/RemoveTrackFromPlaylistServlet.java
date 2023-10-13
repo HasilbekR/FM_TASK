@@ -15,6 +15,7 @@ import java.io.IOException;
 public class RemoveTrackFromPlaylistServlet extends HttpServlet {
     private final PlaylistTracksService playlistTracksService = new PlaylistTracksService();
     private final ObjectMapper objectMapper = Utils.getObjectMapper();
+
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         PlaylistRemoveTrackDto playlistTrack = objectMapper.readValue(req.getReader(), PlaylistRemoveTrackDto.class);

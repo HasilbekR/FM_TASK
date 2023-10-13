@@ -12,6 +12,7 @@ import java.io.IOException;
 @WebServlet(urlPatterns = "/album/delete")
 public class DeleteAlbumServlet extends HttpServlet {
     private final AlbumService albumService = new AlbumService();
+
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String albumId = req.getParameter("albumId");

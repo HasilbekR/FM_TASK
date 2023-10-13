@@ -17,6 +17,7 @@ public class SaveArtistServlet extends HttpServlet {
 
     private final ArtistService artistService = new ArtistService();
     private final ObjectMapper objectMapper = Utils.getObjectMapper();
+
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         ArtistSaveDto artistDto = objectMapper.readValue(req.getReader(), ArtistSaveDto.class);

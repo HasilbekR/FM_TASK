@@ -16,6 +16,7 @@ import java.io.IOException;
 public class UnblockTrackServlet extends HttpServlet {
     private final TrackService trackService = new TrackService();
     private final ObjectMapper objectMapper = Utils.getObjectMapper();
+
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         TrackBlockDto trackBlockDto = objectMapper.readValue(req.getReader(), TrackBlockDto.class);
