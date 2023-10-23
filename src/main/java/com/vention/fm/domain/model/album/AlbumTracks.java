@@ -1,9 +1,9 @@
 package com.vention.fm.domain.model.album;
 
+import com.vention.fm.domain.model.track.Track;
 import lombok.*;
 import com.vention.fm.domain.model.BaseModel;
 
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -11,7 +11,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 public class AlbumTracks extends BaseModel {
-    private UUID albumId;
-    private UUID trackId;
+    private Album album;
+    private Track track;
     private Integer trackPosition;
 }

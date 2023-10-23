@@ -1,24 +1,30 @@
 package com.vention.fm.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vention.fm.domain.dto.artist.ArtistDto;
+import com.vention.fm.domain.dto.artist.ArtistSaveDto;
 import com.vention.fm.exception.DataNotFoundException;
 import com.vention.fm.repository.artist.ArtistRepository;
 import com.vention.fm.repository.artist.ArtistRepositoryImpl;
 import com.vention.fm.domain.model.artist.Artist;
+import com.vention.fm.utils.Utils;
+import org.modelmapper.ModelMapper;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class ArtistService {
     private final ArtistRepository artistRepository = new ArtistRepositoryImpl();
-
-    public Artist getArtistByName(String name) {
-        return artistRepository.getArtistByName(name);
-    }
-
-    public List<Artist> getAll() {
-        return artistRepository.getAll();
-    }
+    private final ModelMapper modelMapper = Utils.modelMapper();
+    private final ObjectMapper objectMapper = Utils.getObjectMapper();
 
     /**
      * First we check if the artist exists in db and if it is we update artist entity as
@@ -26,41 +32,109 @@ public class ArtistService {
      * and when it is saved separately we get this data
      * Then if the artist doesn't exist in db we get exception and in catch block we save them
      *
-     * @param artist -
      * @return -artist entity
      */
+    public ArtistDto create(ArtistSaveDto artistDto) {
+        Artist artist = Artist
+                .builder()
+                .name(artistDto.getName())
+                .url(artistDto.getUrl())
+                .build();
+        Artist savedArtist = save(artist);
+        return modelMapper.map(savedArtist, ArtistDto.class);
+    }
+
     public Artist save(Artist artist) {
-        try {
-            Artist artistByName = artistRepository.getArtistByName(artist.getName());
+        Artist artistByName = artistRepository.getArtistByName(artist.getName());
+        if (artistByName == null) {
+            artistRepository.save(artist);
+            return artist;
+        } else {
             //id has to be set from existing object as some ids are created from project not from fm chart
             artist.setId(artistByName.getId());
             artistRepository.update(artist);
             return artistRepository.getArtistByName(artist.getName());
-        } catch (DataNotFoundException e) {
-            artistRepository.save(artist);
-            return artist;
         }
     }
 
-    public List<Artist> saveAll(List<Artist> artistList) {
-        List<Artist> savedArtists = new ArrayList<>();
+    public List<ArtistDto> saveAll(List<Artist> artistList) {
+        List<ArtistDto> savedArtists = new ArrayList<>();
 
         for (Artist artist : artistList) {
             Artist savedArtist = save(artist);
-            savedArtists.add(savedArtist);
+            ArtistDto artistDto = modelMapper.map(savedArtist, ArtistDto.class);
+            savedArtists.add(artistDto);
         }
         return savedArtists;
     }
 
+    public String saveTopArtists(String page) throws IOException {
+        if (page == null) {
+            page = "1";
+        }
+        String apiUrl = Utils.url("/url") + "/artist/save-top-artists?page=" + page;
+        URL url = new URL(apiUrl);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("GET");
+        connection.setRequestProperty("service", "main");
+
+        int responseCode = connection.getResponseCode();
+        if (responseCode == HttpURLConnection.HTTP_OK) {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+                List<Artist> artists = objectMapper.readValue(reader, new TypeReference<>() {
+                });
+                List<ArtistDto> savedArtists = saveAll(artists);
+                return objectMapper.writeValueAsString(savedArtists);
+            }
+        }
+        return null;
+    }
+
+    public ArtistDto getArtistDto(String name) {
+        return modelMapper.map(artistRepository.getArtistByName(name), ArtistDto.class);
+    }
+
+    public ArtistDto getArtistDto(UUID artistId) {
+        return modelMapper.map(artistRepository.getArtistById(artistId), ArtistDto.class);
+    }
+
+    public Artist getArtistByName(String name) {
+        return artistRepository.getArtistByName(name);
+    }
+
+    public Artist getArtistState(String name) {
+        Artist artistState = artistRepository.getArtistState(name);
+        if (artistState != null) {
+            return artistState;
+        } else {
+            throw new DataNotFoundException("Artist not found");
+        }
+    }
+
+    public List<ArtistDto> getAll() {
+        List<Artist> artists = artistRepository.getAll();
+        return artists.stream().map(artist -> modelMapper.map(artist, ArtistDto.class))
+                .collect(Collectors.toList());
+    }
+
     public UUID getIdByName(String name) {
-        return artistRepository.getIdByName(name);
+        UUID artistId = artistRepository.getIdByName(name);
+        if (artistId != null) {
+            return artistId;
+        }
+        throw new DataNotFoundException("Artist with name " + name + " not found");
     }
 
-    public void blockArtist(Boolean isBlocked, UUID artistId) {
-        artistRepository.blockArtist(isBlocked, artistId);
+    public void blockArtist(Boolean isBlocked, String artistName) {
+        Artist artistState = artistRepository.getArtistState(artistName);
+        if (artistState != null) {
+            artistRepository.blockArtist(isBlocked, artistName);
+        } else {
+            throw new DataNotFoundException("Artist with name " + artistName + " not found");
+        }
     }
 
-    public Boolean isBlocked(UUID artistId) {
+    public boolean isBlocked(UUID artistId) {
         return artistRepository.isBlocked(artistId);
     }
 }

@@ -1,11 +1,15 @@
 package com.vention.fm.domain.dto.album;
 
-import lombok.Data;
+import lombok.*;
 
 import java.util.UUID;
 
-@Data
-public class AlbumAddTrackDto {
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class AlbumRemoveTrackDto {
     private String albumName;
     private String trackName;
     private UUID userId;

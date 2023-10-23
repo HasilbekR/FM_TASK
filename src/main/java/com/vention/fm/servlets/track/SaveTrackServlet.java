@@ -1,8 +1,8 @@
 package com.vention.fm.servlets.track;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vention.fm.domain.dto.track.TrackDto;
 import com.vention.fm.domain.dto.track.TrackSaveDto;
-import com.vention.fm.domain.model.track.Track;
 import com.vention.fm.service.TrackService;
 import com.vention.fm.utils.Utils;
 import jakarta.servlet.annotation.WebServlet;
@@ -20,9 +20,9 @@ public class SaveTrackServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        TrackSaveDto trackDto = objectMapper.readValue(req.getReader(), TrackSaveDto.class);
-        Track savedTrack = trackService.createTrack(trackDto);
-        String json = objectMapper.writeValueAsString(savedTrack);
+        TrackSaveDto tracksaveDto = objectMapper.readValue(req.getReader(), TrackSaveDto.class);
+        TrackDto track = trackService.createTrack(tracksaveDto);
+        String json = objectMapper.writeValueAsString(track);
         resp.getWriter().print(json);
     }
 }

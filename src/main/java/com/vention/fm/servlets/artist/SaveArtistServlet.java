@@ -1,8 +1,8 @@
 package com.vention.fm.servlets.artist;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vention.fm.domain.dto.artist.ArtistDto;
 import com.vention.fm.domain.dto.artist.ArtistSaveDto;
-import com.vention.fm.domain.model.artist.Artist;
 import com.vention.fm.service.ArtistService;
 import com.vention.fm.utils.Utils;
 import jakarta.servlet.annotation.WebServlet;
@@ -21,11 +21,7 @@ public class SaveArtistServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         ArtistSaveDto artistDto = objectMapper.readValue(req.getReader(), ArtistSaveDto.class);
-        Artist artist = Artist
-                .builder()
-                .name(artistDto.getName())
-                .url(artistDto.getUrl())
-                .build();
-        artistService.save(artist);
+        ArtistDto artist = artistService.create(artistDto);
+        resp.getWriter().print(objectMapper.writeValueAsString(artist));
     }
 }

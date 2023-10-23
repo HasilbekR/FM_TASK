@@ -12,14 +12,14 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 @WebServlet(urlPatterns = "/playlist/save")
-public class SavePlaylistServlet extends HttpServlet {
+public class CreatePlaylistServlet extends HttpServlet {
     private final PlaylistService playlistService = new PlaylistService();
     private final ObjectMapper objectMapper = Utils.getObjectMapper();
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         PlaylistCreateDto playlistDto = objectMapper.readValue(req.getReader(), PlaylistCreateDto.class);
-        playlistService.save(playlistDto);
-
+        String result = playlistService.save(playlistDto);
+        resp.getWriter().print(result);
     }
 }

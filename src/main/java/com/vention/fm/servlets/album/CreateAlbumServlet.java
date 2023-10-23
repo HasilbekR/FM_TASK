@@ -20,6 +20,7 @@ public class CreateAlbumServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         AlbumCreateDto albumCreateDto = objectMapper.readValue(req.getReader(), AlbumCreateDto.class);
-        albumService.save(albumCreateDto);
+        String result = albumService.save(albumCreateDto);
+        resp.getWriter().print(result);
     }
 }

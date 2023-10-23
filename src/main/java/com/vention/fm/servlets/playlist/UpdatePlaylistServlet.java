@@ -19,6 +19,7 @@ public class UpdatePlaylistServlet extends HttpServlet {
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         PlaylistUpdateDto playlistDto = objectMapper.readValue(req.getReader(), PlaylistUpdateDto.class);
-        playlistService.update(playlistDto);
+        String result = playlistService.update(playlistDto);
+        resp.getWriter().print(result);
     }
 }

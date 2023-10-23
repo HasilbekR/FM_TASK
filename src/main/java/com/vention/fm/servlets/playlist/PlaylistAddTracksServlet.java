@@ -19,6 +19,7 @@ public class PlaylistAddTracksServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         PlaylistAddTrackDto playlistTrack = objectMapper.readValue(req.getReader(), PlaylistAddTrackDto.class);
-        playlistTracksService.addPlaylist(playlistTrack);
+        String result = playlistTracksService.addPlaylist(playlistTrack);
+        resp.getWriter().print(result);
     }
 }

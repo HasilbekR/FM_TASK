@@ -19,6 +19,7 @@ public class RemoveTrackFromPlaylistServlet extends HttpServlet {
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         PlaylistRemoveTrackDto playlistTrack = objectMapper.readValue(req.getReader(), PlaylistRemoveTrackDto.class);
-        playlistTracksService.removeTrack(playlistTrack);
+        String result = playlistTracksService.removeTrack(playlistTrack);
+        resp.getWriter().print(result);
     }
 }

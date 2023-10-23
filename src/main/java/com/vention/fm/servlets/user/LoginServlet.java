@@ -2,7 +2,7 @@ package com.vention.fm.servlets.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vention.fm.domain.dto.user.LoginDto;
-import com.vention.fm.domain.model.user.UserEntity;
+import com.vention.fm.domain.dto.user.UserDto;
 import com.vention.fm.service.UserService;
 import com.vention.fm.utils.Utils;
 import jakarta.servlet.annotation.WebServlet;
@@ -20,8 +20,8 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         LoginDto loginDto = objectMapper.readValue(req.getReader(), LoginDto.class);
-        UserEntity userEntity = userService.signIn(loginDto);
-        String json = objectMapper.writeValueAsString(userEntity);
+        UserDto user = userService.signIn(loginDto);
+        String json = objectMapper.writeValueAsString(user);
         resp.getWriter().print(json);
     }
 }

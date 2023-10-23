@@ -1,7 +1,6 @@
 package com.vention.fm.repository.playlist_rating;
 
 import com.vention.fm.domain.model.playlist.PlaylistRating;
-import com.vention.fm.exception.DataNotFoundException;
 import com.vention.fm.utils.DatabaseUtils;
 import com.vention.fm.utils.Utils;
 import com.vention.fm.utils.ResultSetMapper;
@@ -21,13 +20,40 @@ public class PlaylistRatingRepositoryImpl implements PlaylistRatingRepository {
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(INSERT);
             DatabaseUtils.setValues(preparedStatement, playlistRating);
-            preparedStatement.setObject(5, playlistRating.getPlaylistId());
-            preparedStatement.setObject(6, playlistRating.getUserId());
-            preparedStatement.setBoolean(7, playlistRating.getIsLiked());
+            preparedStatement.setObject(5, playlistRating.getPlaylist().getId());
+            preparedStatement.setObject(6, playlistRating.getUser().getId());
+            preparedStatement.setBoolean(7, playlistRating.isLiked());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public PlaylistRating get(UUID playlistId, UUID userId) {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(GET);
+            preparedStatement.setObject(1, playlistId);
+            preparedStatement.setObject(2, userId);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return ResultSetMapper.mapPlaylistRating(resultSet);
+            } else {
+                return null;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public int getLikeCount(UUID playlistId) {
+        return DatabaseUtils.getPerformanceData(playlistId, connection, GET_LIKE_COUNT);
+    }
+
+    @Override
+    public int getDislikeCount(UUID playlistId) {
+        return DatabaseUtils.getPerformanceData(playlistId, connection, GET_DISLIKE_COUNT);
     }
 
     @Override
@@ -54,31 +80,5 @@ public class PlaylistRatingRepositoryImpl implements PlaylistRatingRepository {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    @Override
-    public PlaylistRating get(UUID playlistId, UUID userId) {
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement(GET);
-            preparedStatement.setObject(1, playlistId);
-            preparedStatement.setObject(2, userId);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                return ResultSetMapper.mapPlaylistRating(resultSet);
-            }
-            throw new DataNotFoundException("Playlist rating not found");
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public int getLikeCount(UUID playlistId) {
-        return DatabaseUtils.getData(playlistId, connection, GET_LIKE_COUNT);
-    }
-
-    @Override
-    public int getDislikeCount(UUID playlistId) {
-        return DatabaseUtils.getData(playlistId, connection, GET_DISLIKE_COUNT);
     }
 }

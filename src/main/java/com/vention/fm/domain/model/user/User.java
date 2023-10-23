@@ -10,7 +10,7 @@ import lombok.experimental.Accessors;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserEntity extends BaseModel {
+public class User extends BaseModel {
     private String username;
     private String email;
     private String password;

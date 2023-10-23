@@ -9,14 +9,15 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.UUID;
 
-@WebServlet(urlPatterns = "/playlist/DeleteAlbumServlet")
+@WebServlet(urlPatterns = "/playlist/delete")
 public class DeletePlaylistServlet extends HttpServlet {
     private final PlaylistService playlistService = new PlaylistService();
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        UUID playlistId = UUID.fromString(req.getParameter("playlistId"));
-        UUID ownerId = UUID.fromString(req.getParameter("ownerId"));
-        playlistService.delete(playlistId, ownerId);
+        String playlistName = req.getParameter("name");
+        UUID ownerId = UUID.fromString(req.getParameter("userId"));
+        String result = playlistService.delete(playlistName, ownerId);
+        resp.getWriter().print(result);
     }
 }
