@@ -9,9 +9,9 @@ import com.vention.fm.domain.model.user.User;
 import com.vention.fm.exception.DataNotFoundException;
 import com.vention.fm.repository.album.AlbumRepository;
 import com.vention.fm.repository.album.AlbumRepositoryImpl;
+import com.vention.fm.utils.MapStruct;
 
 import java.nio.file.AccessDeniedException;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,6 +19,7 @@ public class AlbumService {
     private final AlbumRepository albumRepository = new AlbumRepositoryImpl();
     private final UserService userService = new UserService();
     private final ArtistService artistService = new ArtistService();
+    private final MapStruct mapStruct = MapStruct.INSTANCE;
 
     public String save(AlbumCreateDto albumCreateDto) throws AccessDeniedException {
         User user = userService.getUserState(albumCreateDto.getUserId());
@@ -43,18 +44,16 @@ public class AlbumService {
         }
         throw new DataNotFoundException("Album not found");
     }
-
+    public Album getAlbum(String albumName, UUID ownerId) {
+        Album album = albumRepository.getAlbum(albumName, ownerId);
+        if (album != null) {
+            return album;
+        }
+        throw new DataNotFoundException("Album not found");
+    }
     public List<AlbumDto> getAll(UUID ownerId) {
         List<Album> albums = albumRepository.getAll(ownerId);
-        List<AlbumDto> albumDtoList = new LinkedList<>();
-        for (Album album : albums) {
-            albumDtoList.add(
-                    AlbumDto.builder()
-                            .name(album.getName())
-                            .artist(artistService.getArtistDto(album.getArtist().getId()))
-                            .build());
-        }
-        return albumDtoList;
+        return mapStruct.albumsToDto(albums);
     }
 
     public String update(AlbumUpdateDto albumDto) throws AccessDeniedException {

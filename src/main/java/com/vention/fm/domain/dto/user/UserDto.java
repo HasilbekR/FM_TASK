@@ -1,5 +1,6 @@
 package com.vention.fm.domain.dto.user;
 
+import com.vention.fm.domain.model.user.UserRole;
 import lombok.*;
 
 @Getter
@@ -11,5 +12,5 @@ public class UserDto {
     private String username;
     private String email;
     private Boolean isVerified;
-    private String role;
+    private UserRole role;
 }

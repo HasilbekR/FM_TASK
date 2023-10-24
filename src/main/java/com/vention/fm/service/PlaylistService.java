@@ -7,11 +7,9 @@ import com.vention.fm.domain.model.user.User;
 import com.vention.fm.exception.DataNotFoundException;
 import com.vention.fm.repository.playlist.PlaylistRepository;
 import com.vention.fm.repository.playlist.PlaylistRepositoryImpl;
-import com.vention.fm.utils.Utils;
-import org.modelmapper.ModelMapper;
+import com.vention.fm.utils.MapStruct;
 
 import java.nio.file.AccessDeniedException;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,7 +17,7 @@ public class PlaylistService {
     private final PlaylistRepository playlistRepository = new PlaylistRepositoryImpl();
     private final UserService userService = new UserService();
     private final PlaylistRatingService playlistRatingService = new PlaylistRatingService();
-    private final ModelMapper modelMapper = Utils.modelMapper();
+    private final MapStruct mapStruct = MapStruct.INSTANCE;
 
     public String save(PlaylistCreateDto playlistDto) throws AccessDeniedException {
         User user = userService.getUserState(playlistDto.getUserId());
@@ -61,20 +59,12 @@ public class PlaylistService {
 
     public List<PlaylistDto> getAvailablePlaylists() {
         List<Playlist> availablePlaylists = playlistRepository.getAvailablePlaylists();
-        List<PlaylistDto> playlistDtoList = new LinkedList<>();
-        for (Playlist availablePlaylist : availablePlaylists) {
-            playlistDtoList.add(modelMapper.map(availablePlaylist, PlaylistDto.class));
-        }
-        return playlistDtoList;
+        return mapStruct.playlistsToDto(availablePlaylists);
     }
 
     public List<PlaylistDto> getAllByOwnerId(UUID ownerId) {
         List<Playlist> playlists = playlistRepository.getAllByOwnerId(ownerId);
-        List<PlaylistDto> playlistDtoList = new LinkedList<>();
-        for (Playlist availablePlaylist : playlists) {
-            playlistDtoList.add(modelMapper.map(availablePlaylist, PlaylistDto.class));
-        }
-        return playlistDtoList;
+        return mapStruct.playlistsToDto(playlists);
     }
 
     /**

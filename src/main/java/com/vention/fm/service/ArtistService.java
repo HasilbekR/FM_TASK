@@ -8,8 +8,8 @@ import com.vention.fm.exception.DataNotFoundException;
 import com.vention.fm.repository.artist.ArtistRepository;
 import com.vention.fm.repository.artist.ArtistRepositoryImpl;
 import com.vention.fm.domain.model.artist.Artist;
+import com.vention.fm.utils.MapStruct;
 import com.vention.fm.utils.Utils;
-import org.modelmapper.ModelMapper;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -19,11 +19,10 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 public class ArtistService {
     private final ArtistRepository artistRepository = new ArtistRepositoryImpl();
-    private final ModelMapper modelMapper = Utils.modelMapper();
+    private final MapStruct mapStruct = MapStruct.INSTANCE;
     private final ObjectMapper objectMapper = Utils.getObjectMapper();
 
     /**
@@ -41,7 +40,7 @@ public class ArtistService {
                 .url(artistDto.getUrl())
                 .build();
         Artist savedArtist = save(artist);
-        return modelMapper.map(savedArtist, ArtistDto.class);
+        return mapStruct.artistToDto(savedArtist);
     }
 
     public Artist save(Artist artist) {
@@ -62,7 +61,7 @@ public class ArtistService {
 
         for (Artist artist : artistList) {
             Artist savedArtist = save(artist);
-            ArtistDto artistDto = modelMapper.map(savedArtist, ArtistDto.class);
+            ArtistDto artistDto = mapStruct.artistToDto(savedArtist);
             savedArtists.add(artistDto);
         }
         return savedArtists;
@@ -91,11 +90,7 @@ public class ArtistService {
     }
 
     public ArtistDto getArtistDto(String name) {
-        return modelMapper.map(artistRepository.getArtistByName(name), ArtistDto.class);
-    }
-
-    public ArtistDto getArtistDto(UUID artistId) {
-        return modelMapper.map(artistRepository.getArtistById(artistId), ArtistDto.class);
+        return mapStruct.artistToDto(artistRepository.getArtistByName(name));
     }
 
     public Artist getArtistByName(String name) {
@@ -112,9 +107,7 @@ public class ArtistService {
     }
 
     public List<ArtistDto> getAll() {
-        List<Artist> artists = artistRepository.getAll();
-        return artists.stream().map(artist -> modelMapper.map(artist, ArtistDto.class))
-                .collect(Collectors.toList());
+        return mapStruct.artistsToDto(artistRepository.getAll());
     }
 
     public UUID getIdByName(String name) {

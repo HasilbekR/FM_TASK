@@ -10,8 +10,7 @@ import com.vention.fm.domain.model.track.Track;
 import com.vention.fm.exception.AuthenticationFailedException;
 import com.vention.fm.repository.playlist_tracks.PlaylistTracksRepository;
 import com.vention.fm.repository.playlist_tracks.PlaylistTracksRepositoryImpl;
-import com.vention.fm.utils.Utils;
-import org.modelmapper.ModelMapper;
+import com.vention.fm.utils.MapStruct;
 
 import java.nio.file.AccessDeniedException;
 import java.util.LinkedList;
@@ -22,7 +21,7 @@ public class PlaylistTracksService {
     private final PlaylistTracksRepository playlistTracksRepository = new PlaylistTracksRepositoryImpl();
     private final PlaylistService playlistService = new PlaylistService();
     private final TrackService trackService = new TrackService();
-    private final ModelMapper modelMapper = Utils.modelMapper();
+    private final MapStruct mapStruct = MapStruct.INSTANCE;
 
     public String addPlaylist(PlaylistAddTrackDto trackDto) throws AccessDeniedException {
         Track trackState = trackService.getTrackState(trackDto.getTrackName());
@@ -50,17 +49,14 @@ public class PlaylistTracksService {
         List<TrackDto> tracks = new LinkedList<>();
         for (PlaylistTracks playlistTrack : playlistTracks) {
             Track track = playlistTrack.getTrack();
-            TrackDto trackDto = modelMapper.map(track, TrackDto.class);
+            TrackDto trackDto = mapStruct.trackToDto(track);
             trackDto.setPosition(playlistTrack.getTrackPosition());
 
             tracks.add(trackDto);
         }
-        return PlaylistDto.builder()
-                .name(playlist.getName())
-                .likeCount(playlist.getLikeCount())
-                .dislikeCount(playlist.getDislikeCount())
-                .tracks(tracks)
-                .build();
+        PlaylistDto playlistDto = mapStruct.playlistToDto(playlist);
+        playlistDto.setTracks(tracks);
+        return playlistDto;
     }
 
     public String removeTrack(PlaylistRemoveTrackDto playlistTrackDto) {

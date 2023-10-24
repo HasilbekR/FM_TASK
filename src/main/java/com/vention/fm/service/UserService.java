@@ -10,16 +10,14 @@ import com.vention.fm.exception.DataNotFoundException;
 import com.vention.fm.exception.UniqueObjectException;
 import com.vention.fm.repository.user.UserRepository;
 import com.vention.fm.repository.user.UserRepositoryImpl;
-import com.vention.fm.utils.Utils;
-import org.modelmapper.ModelMapper;
+import com.vention.fm.utils.MapStruct;
 
-import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
 public class UserService {
     private final UserRepository userRepository = new UserRepositoryImpl();
-    private final ModelMapper modelMapper = Utils.modelMapper();
+    private final MapStruct mapStruct = MapStruct.INSTANCE;
 
     public void signUp(UserRequestDto userRequestDto) {
         if (userRepository.getByUsername(userRequestDto.getUsername()) != null) {
@@ -39,7 +37,7 @@ public class UserService {
         User user = userRepository.getByUsername(loginDto.getUsername());
         if (user != null) {
             if (user.getPassword().equals(loginDto.getPassword())) {
-                return modelMapper.map(user, UserDto.class);
+                return mapStruct.userToDto(user);
             } else {
                 throw new AuthenticationFailedException("Wrong password");
             }
@@ -62,12 +60,12 @@ public class UserService {
 
     public List<UserDto> getAllActiveUsers() {
         List<User> allUsers = userRepository.getAllUsers(false);
-        return mapToDtoList(allUsers);
+        return mapStruct.usersToDto(allUsers);
     }
 
     public List<UserDto> getAllBlockedUsers() {
         List<User> allUsers = userRepository.getAllUsers(true);
-        return mapToDtoList(allUsers);
+        return mapStruct.usersToDto(allUsers);
     }
 
     public void doesUserExist(UUID userId) {
@@ -97,13 +95,5 @@ public class UserService {
         } else {
             throw new DataNotFoundException("User with username " + username + " not found");
         }
-    }
-
-    private List<UserDto> mapToDtoList(List<User> users) {
-        List<UserDto> userDtoList = new LinkedList<>();
-        for (User user : users) {
-            userDtoList.add(modelMapper.map(user, UserDto.class));
-        }
-        return userDtoList;
     }
 }

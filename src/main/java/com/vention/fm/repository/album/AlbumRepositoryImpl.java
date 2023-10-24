@@ -65,6 +65,23 @@ public class AlbumRepositoryImpl implements AlbumRepository {
     }
 
     @Override
+    public Album getAlbum(String albumName, UUID ownerId) {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(GET_ALBUM);
+            preparedStatement.setString(1, albumName);
+            preparedStatement.setObject(2, ownerId);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return ResultSetMapper.mapAlbum(resultSet);
+            } else {
+                return null;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
     public List<Album> getAll(UUID ownerId) {
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(GET_ALL);
@@ -82,7 +99,7 @@ public class AlbumRepositoryImpl implements AlbumRepository {
 
     @Override
     public void update(Album album) {
-        try{
+        try {
             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE);
             preparedStatement.setObject(1, LocalDateTime.now());
             preparedStatement.setString(2, album.getName());

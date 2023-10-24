@@ -3,15 +3,13 @@ package com.vention.fm.service;
 import com.vention.fm.domain.dto.album.AlbumAddTrackDto;
 import com.vention.fm.domain.dto.album.AlbumDto;
 import com.vention.fm.domain.dto.album.AlbumRemoveTrackDto;
-import com.vention.fm.domain.dto.artist.ArtistDto;
 import com.vention.fm.domain.dto.track.TrackDto;
 import com.vention.fm.domain.model.album.Album;
 import com.vention.fm.domain.model.album.AlbumTracks;
 import com.vention.fm.domain.model.track.Track;
 import com.vention.fm.repository.album_tracks.AlbumTracksRepository;
 import com.vention.fm.repository.album_tracks.AlbumTracksRepositoryImpl;
-import com.vention.fm.utils.Utils;
-import org.modelmapper.ModelMapper;
+import com.vention.fm.utils.MapStruct;
 
 import java.nio.file.AccessDeniedException;
 import java.util.LinkedList;
@@ -23,8 +21,7 @@ public class AlbumTracksService {
     private final AlbumService albumService = new AlbumService();
     private final ArtistService artistService = new ArtistService();
     private final TrackService trackService = new TrackService();
-    private final ModelMapper modelMapper = Utils.modelMapper();
-
+    private final MapStruct mapStruct = MapStruct.INSTANCE;
     //In this method I used DTOs to avoid sending multiple request to database as I need ids and is_blocked states
     public String save(AlbumAddTrackDto trackDto) throws AccessDeniedException {
         Track trackState = trackService.getTrackState(trackDto.getTrackName());
@@ -53,24 +50,20 @@ public class AlbumTracksService {
     }
 
     public AlbumDto getAlbum(String albumName, UUID ownerId) {
-        Album albumState = albumService.getAlbumState(albumName, ownerId);
+        Album album = albumService.getAlbum(albumName, ownerId);
+        AlbumDto albumDto = mapStruct.albumToDto(album);
 
-        ArtistDto artistDto = artistService.getArtistDto(albumState.getArtist().getId());
-
-        List<TrackDto> albumTracks = getAlbumTracks(albumState.getId());
-
-        return AlbumDto.builder()
-                .name(albumName)
-                .artist(artistDto)
-                .tracks(albumTracks)
-                .build();
+        List<TrackDto> albumTracks = getAlbumTracks(album.getId());
+        albumDto.setTracks(albumTracks);
+        return albumDto;
     }
 
     public List<TrackDto> getAlbumTracks(UUID albumId) {
         List<AlbumTracks> albumTracks = albumTracksRepository.getAlbumTracks(albumId);
         List<TrackDto> trackDtoList = new LinkedList<>();
         for (AlbumTracks albumTrack : albumTracks) {
-            TrackDto trackDto = modelMapper.map(albumTrack.getTrack(), TrackDto.class);
+            TrackDto trackDto = mapStruct.trackToDto(albumTrack.getTrack());
+            trackDto.setPosition(albumTrack.getTrackPosition());
             trackDtoList.add(trackDto);
         }
         return trackDtoList;
