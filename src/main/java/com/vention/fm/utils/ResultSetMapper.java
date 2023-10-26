@@ -20,6 +20,8 @@ import com.vention.fm.repository.track.TrackRepository;
 import com.vention.fm.repository.track.TrackRepositoryImpl;
 import com.vention.fm.repository.user.UserRepository;
 import com.vention.fm.repository.user.UserRepositoryImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -33,6 +35,8 @@ public class ResultSetMapper {
     private final static AlbumRepository albumRepository = new AlbumRepositoryImpl();
     private final static TrackRepository trackRepository = new TrackRepositoryImpl();
 
+    private static final Logger log = LoggerFactory.getLogger(ResultSetMapper.class);
+
     public static User mapUser(ResultSet resultSet) {
         try {
             User user = new User()
@@ -44,8 +48,9 @@ public class ResultSetMapper {
             map(resultSet, user);
             return user;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while mapping user", e);
         }
+        return null;
     }
 
     public static Track mapTrack(ResultSet resultSet) {
@@ -61,8 +66,9 @@ public class ResultSetMapper {
             map(resultSet, track);
             return track;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while mapping track", e);
         }
+        return null;
     }
 
     public static Track mapTrackState(ResultSet resultSet) {
@@ -78,8 +84,9 @@ public class ResultSetMapper {
             track.setIsBlocked(resultSet.getBoolean("is_blocked"));
             return track;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while mapping track state", e);
         }
+        return null;
     }
 
     public static Artist mapArtist(ResultSet resultSet) {
@@ -93,8 +100,9 @@ public class ResultSetMapper {
             map(resultSet, artist);
             return artist;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while mapping artist", e);
         }
+        return null;
     }
 
     public static Artist mapArtistState(ResultSet resultSet) {
@@ -104,8 +112,9 @@ public class ResultSetMapper {
             artist.setIsBlocked(resultSet.getBoolean("is_blocked"));
             return artist;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while mapping artist state", e);
         }
+        return null;
     }
 
     public static Album mapAlbum(ResultSet resultSet) {
@@ -118,9 +127,9 @@ public class ResultSetMapper {
             map(resultSet, album);
             return album;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while mapping album", e);
         }
-
+        return null;
     }
 
     public static Album mapAlbumState(ResultSet resultSet) {
@@ -132,8 +141,9 @@ public class ResultSetMapper {
             album.setArtist(artist);
             return album;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while mapping album state", e);
         }
+        return null;
     }
 
     public static AlbumTracks mapAlbumTracks(ResultSet resultSet) {
@@ -146,8 +156,9 @@ public class ResultSetMapper {
             map(resultSet, albumTracks);
             return albumTracks;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while mapping album tracks", e);
         }
+        return null;
     }
 
     public static Playlist mapPlaylist(ResultSet resultSet) {
@@ -162,8 +173,9 @@ public class ResultSetMapper {
             map(resultSet, playlist);
             return playlist;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while mapping playlist", e);
         }
+        return null;
     }
 
     public static Playlist mapPlaylistState(ResultSet resultSet) {
@@ -176,8 +188,9 @@ public class ResultSetMapper {
             playlist.setOwner(user);
             return playlist;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while mapping playlist state", e);
         }
+        return null;
     }
 
     public static PlaylistTracks mapPlaylistTracks(ResultSet resultSet) {
@@ -190,8 +203,9 @@ public class ResultSetMapper {
             map(resultSet, playlistTracks);
             return playlistTracks;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while mapping playlist tracks", e);
         }
+        return null;
     }
 
     public static PlaylistRating mapPlaylistRating(ResultSet resultSet) {
@@ -204,8 +218,9 @@ public class ResultSetMapper {
             map(resultSet, rating);
             return rating;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while mapping playlist rating", e);
         }
+        return null;
     }
 
     private static void map(ResultSet resultSet, BaseModel baseModel) {
@@ -217,7 +232,7 @@ public class ResultSetMapper {
             baseModel.setIsBlocked(resultSet.getBoolean("is_blocked"));
             baseModel.setId(UUID.fromString(resultSet.getString("id")));
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while mapping", e);
         }
     }
 }

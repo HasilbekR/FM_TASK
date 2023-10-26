@@ -1,9 +1,12 @@
 package com.vention.fm.repository.track;
 
 import com.vention.fm.domain.model.track.Track;
+import com.vention.fm.exception.BadRequestException;
 import com.vention.fm.utils.DatabaseUtils;
 import com.vention.fm.utils.Utils;
 import com.vention.fm.utils.ResultSetMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -12,6 +15,8 @@ import java.util.UUID;
 
 public class TrackRepositoryImpl implements TrackRepository {
     private final Connection connection = Utils.getConnection();
+
+    private static final Logger log = LoggerFactory.getLogger(TrackRepositoryImpl.class);
 
     @Override
     public void save(Track track) {
@@ -30,7 +35,8 @@ public class TrackRepositoryImpl implements TrackRepository {
             preparedStatement.setObject(10, track.getArtist().getId());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while saving track", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -46,7 +52,8 @@ public class TrackRepositoryImpl implements TrackRepository {
                 return null;
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while retrieving track", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -62,7 +69,8 @@ public class TrackRepositoryImpl implements TrackRepository {
                 return null;
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while retrieving track", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -78,7 +86,8 @@ public class TrackRepositoryImpl implements TrackRepository {
                 return null;
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while retrieving track state", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -95,7 +104,8 @@ public class TrackRepositoryImpl implements TrackRepository {
                 return null;
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while retrieving track", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -111,7 +121,8 @@ public class TrackRepositoryImpl implements TrackRepository {
             }
             return tracks;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while retrieving tracks", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -126,7 +137,8 @@ public class TrackRepositoryImpl implements TrackRepository {
             }
             return tracks;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while retrieving tracks", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -142,7 +154,8 @@ public class TrackRepositoryImpl implements TrackRepository {
             }
             return tracks;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while retrieving tracks", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -159,7 +172,8 @@ public class TrackRepositoryImpl implements TrackRepository {
             preparedStatement.setObject(7, track.getId());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while updating track", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 

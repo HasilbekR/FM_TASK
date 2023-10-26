@@ -2,6 +2,7 @@ package com.vention.fm.servlets.playlist;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vention.fm.domain.dto.playlist.PlaylistAddTrackDto;
+import com.vention.fm.exception.BadRequestException;
 import com.vention.fm.service.PlaylistTracksService;
 import com.vention.fm.utils.Utils;
 import jakarta.servlet.annotation.WebServlet;
@@ -17,9 +18,13 @@ public class PlaylistAddTracksServlet extends HttpServlet {
     private final ObjectMapper objectMapper = Utils.getObjectMapper();
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        PlaylistAddTrackDto playlistTrack = objectMapper.readValue(req.getReader(), PlaylistAddTrackDto.class);
-        String result = playlistTracksService.addPlaylist(playlistTrack);
-        resp.getWriter().print(result);
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
+        try {
+            PlaylistAddTrackDto playlistTrack = objectMapper.readValue(req.getReader(), PlaylistAddTrackDto.class);
+            String result = playlistTracksService.addPlaylist(playlistTrack);
+            resp.getWriter().print(result);
+        } catch (IOException e) {
+            throw new BadRequestException(e.getMessage());
+        }
     }
 }

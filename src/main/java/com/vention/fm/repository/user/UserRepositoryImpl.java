@@ -1,9 +1,12 @@
 package com.vention.fm.repository.user;
 
 import com.vention.fm.domain.model.user.User;
+import com.vention.fm.exception.BadRequestException;
 import com.vention.fm.utils.DatabaseUtils;
 import com.vention.fm.utils.Utils;
 import com.vention.fm.utils.ResultSetMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.util.LinkedList;
@@ -12,6 +15,7 @@ import java.util.UUID;
 
 public class UserRepositoryImpl implements UserRepository {
     private final Connection connection = Utils.getConnection();
+    private static final Logger log = LoggerFactory.getLogger(UserRepositoryImpl.class);
 
     @Override
     public void save(User user) {
@@ -25,7 +29,8 @@ public class UserRepositoryImpl implements UserRepository {
             preparedStatement.setObject(9, user.getRole(), Types.OTHER);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while saving user", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -41,7 +46,8 @@ public class UserRepositoryImpl implements UserRepository {
                 return null;
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while retrieving user", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -67,7 +73,8 @@ public class UserRepositoryImpl implements UserRepository {
             }
             return users;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while retrieving users", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -83,7 +90,8 @@ public class UserRepositoryImpl implements UserRepository {
                 return null;
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while retrieving user role", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -108,7 +116,8 @@ public class UserRepositoryImpl implements UserRepository {
                 return null;
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while retrieving user", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 }

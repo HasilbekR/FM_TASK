@@ -1,9 +1,12 @@
 package com.vention.fm.repository.artist;
 
 import com.vention.fm.domain.model.artist.Artist;
+import com.vention.fm.exception.BadRequestException;
 import com.vention.fm.utils.DatabaseUtils;
 import com.vention.fm.utils.Utils;
 import com.vention.fm.utils.ResultSetMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -12,6 +15,7 @@ import java.util.UUID;
 
 public class ArtistRepositoryImpl implements ArtistRepository {
     private final Connection connection = Utils.getConnection();
+    private static final Logger log = LoggerFactory.getLogger(ArtistRepositoryImpl.class);
 
     @Override
     public void save(Artist artist) {
@@ -32,7 +36,8 @@ public class ArtistRepositoryImpl implements ArtistRepository {
             }
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while saving artist", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -48,7 +53,8 @@ public class ArtistRepositoryImpl implements ArtistRepository {
                 return null;
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while retrieving artist", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -64,7 +70,8 @@ public class ArtistRepositoryImpl implements ArtistRepository {
                 return null;
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while retrieving artist", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -80,7 +87,8 @@ public class ArtistRepositoryImpl implements ArtistRepository {
                 return null;
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while retrieving artist state", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -95,7 +103,8 @@ public class ArtistRepositoryImpl implements ArtistRepository {
             }
             return artists;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while retrieving artists", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -111,7 +120,8 @@ public class ArtistRepositoryImpl implements ArtistRepository {
                 return null;
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while retrieving artist id", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -148,7 +158,8 @@ public class ArtistRepositoryImpl implements ArtistRepository {
             preparedStatement.setObject(4, artist.getId());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while updating artist", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -156,5 +167,4 @@ public class ArtistRepositoryImpl implements ArtistRepository {
     public void blockArtist(Boolean isBlocked, String artistName) {
         DatabaseUtils.block(isBlocked, artistName, connection, BLOCK_ARTIST);
     }
-
 }

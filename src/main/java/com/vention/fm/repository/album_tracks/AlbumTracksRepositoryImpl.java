@@ -1,9 +1,12 @@
 package com.vention.fm.repository.album_tracks;
 
 import com.vention.fm.domain.model.album.AlbumTracks;
+import com.vention.fm.exception.BadRequestException;
 import com.vention.fm.utils.DatabaseUtils;
 import com.vention.fm.utils.Utils;
 import com.vention.fm.utils.ResultSetMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -15,6 +18,7 @@ import java.util.UUID;
 
 public class AlbumTracksRepositoryImpl implements AlbumTracksRepository {
     private final Connection connection = Utils.getConnection();
+    private static final Logger log = LoggerFactory.getLogger(AlbumTracksRepositoryImpl.class);
 
     @Override
     public void save(AlbumTracks albumTracks) {
@@ -26,7 +30,8 @@ public class AlbumTracksRepositoryImpl implements AlbumTracksRepository {
             preparedStatement.setInt(7, albumTracks.getTrackPosition());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while saving track to album", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -42,7 +47,8 @@ public class AlbumTracksRepositoryImpl implements AlbumTracksRepository {
             }
             return albumTracks;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while retrieving album tracks", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -60,7 +66,8 @@ public class AlbumTracksRepositoryImpl implements AlbumTracksRepository {
             }
             return albumTracksList;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while retrieving album tracks for reordering", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 

@@ -1,5 +1,6 @@
 package com.vention.fm.servlets.playlist;
 
+import com.vention.fm.exception.BadRequestException;
 import com.vention.fm.service.PlaylistService;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -14,10 +15,14 @@ public class DeletePlaylistServlet extends HttpServlet {
     private final PlaylistService playlistService = new PlaylistService();
 
     @Override
-    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String playlistName = req.getParameter("name");
-        UUID ownerId = UUID.fromString(req.getParameter("userId"));
-        String result = playlistService.delete(playlistName, ownerId);
-        resp.getWriter().print(result);
+    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) {
+        try {
+            String playlistName = req.getParameter("name");
+            UUID ownerId = UUID.fromString(req.getParameter("userId"));
+            String result = playlistService.delete(playlistName, ownerId);
+            resp.getWriter().print(result);
+        } catch (IOException e) {
+            throw new BadRequestException(e.getMessage());
+        }
     }
 }

@@ -1,5 +1,6 @@
 package com.vention.fm.servlets.track;
 
+import com.vention.fm.exception.BadRequestException;
 import com.vention.fm.service.TrackService;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -13,9 +14,13 @@ public class BlockTrackServlet extends HttpServlet {
     private final TrackService trackService = new TrackService();
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String trackName = req.getParameter("name");
-        trackService.blockTrack(true, trackName);
-        resp.getWriter().print("Track with name " + trackName + " is blocked");
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
+        try {
+            String trackName = req.getParameter("name");
+            trackService.blockTrack(true, trackName);
+            resp.getWriter().print("Track with name " + trackName + " is blocked");
+        } catch (IOException e) {
+            throw new BadRequestException(e.getMessage());
+        }
     }
 }

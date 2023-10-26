@@ -22,11 +22,11 @@ public class PlaylistRatingService {
         return playlistRatingRepository.get(playlistId, userId);
     }
 
-    public Integer getLikeCount(UUID playlistId) {
+    public int getLikeCount(UUID playlistId) {
         return playlistRatingRepository.getLikeCount(playlistId);
     }
 
-    public Integer getDislikeCount(UUID playlistId) {
+    public int getDislikeCount(UUID playlistId) {
         return playlistRatingRepository.getDislikeCount(playlistId);
     }
 

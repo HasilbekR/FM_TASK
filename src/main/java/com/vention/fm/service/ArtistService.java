@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vention.fm.domain.dto.artist.ArtistDto;
 import com.vention.fm.domain.dto.artist.ArtistSaveDto;
+import com.vention.fm.exception.BadRequestException;
 import com.vention.fm.exception.DataNotFoundException;
 import com.vention.fm.repository.artist.ArtistRepository;
 import com.vention.fm.repository.artist.ArtistRepositoryImpl;
@@ -67,34 +68,48 @@ public class ArtistService {
         return savedArtists;
     }
 
-    public String saveTopArtists(String page) throws IOException {
-        if (page == null) {
-            page = "1";
-        }
-        String apiUrl = Utils.url("/url") + "/artist/save-top-artists?page=" + page;
-        URL url = new URL(apiUrl);
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestMethod("GET");
-        connection.setRequestProperty("service", "main");
-
-        int responseCode = connection.getResponseCode();
-        if (responseCode == HttpURLConnection.HTTP_OK) {
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-                List<Artist> artists = objectMapper.readValue(reader, new TypeReference<>() {
-                });
-                List<ArtistDto> savedArtists = saveAll(artists);
-                return objectMapper.writeValueAsString(savedArtists);
+    public String saveTopArtists(String page) {
+        try {
+            if (page == null) {
+                page = "1";
             }
+            String apiUrl = Utils.url("/url") + "/artist/save-top-artists?page=" + page;
+            URL url = new URL(apiUrl);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("service", "main");
+
+            int responseCode = connection.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+                    List<Artist> artists = objectMapper.readValue(reader, new TypeReference<>() {
+                    });
+                    List<ArtistDto> savedArtists = saveAll(artists);
+                    return objectMapper.writeValueAsString(savedArtists);
+                }
+            }
+            return null;
+        } catch (IOException e) {
+            throw new BadRequestException(e.getMessage());
         }
-        return null;
     }
 
     public ArtistDto getArtistDto(String name) {
-        return mapStruct.artistToDto(artistRepository.getArtistByName(name));
+        Artist artistByName = artistRepository.getArtistByName(name);
+        if (artistByName != null) {
+            return mapStruct.artistToDto(artistByName);
+        } else {
+            throw new DataNotFoundException("Artist by name " + name + " not found");
+        }
     }
 
     public Artist getArtistByName(String name) {
-        return artistRepository.getArtistByName(name);
+        Artist artistByName = artistRepository.getArtistByName(name);
+        if (artistByName != null) {
+            return artistByName;
+        } else {
+            throw new DataNotFoundException("Artist by name " + name + " not found");
+        }
     }
 
     public Artist getArtistState(String name) {
@@ -107,15 +122,17 @@ public class ArtistService {
     }
 
     public List<ArtistDto> getAll() {
-        return mapStruct.artistsToDto(artistRepository.getAll());
+        List<Artist> artists = artistRepository.getAll();
+        return mapStruct.artistsToDto(artists);
     }
 
     public UUID getIdByName(String name) {
         UUID artistId = artistRepository.getIdByName(name);
         if (artistId != null) {
             return artistId;
+        } else {
+            throw new DataNotFoundException("Artist with name " + name + " not found");
         }
-        throw new DataNotFoundException("Artist with name " + name + " not found");
     }
 
     public void blockArtist(Boolean isBlocked, String artistName) {

@@ -1,9 +1,12 @@
 package com.vention.fm.repository.playlist_rating;
 
 import com.vention.fm.domain.model.playlist.PlaylistRating;
+import com.vention.fm.exception.BadRequestException;
 import com.vention.fm.utils.DatabaseUtils;
 import com.vention.fm.utils.Utils;
 import com.vention.fm.utils.ResultSetMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -15,6 +18,8 @@ import java.util.UUID;
 public class PlaylistRatingRepositoryImpl implements PlaylistRatingRepository {
     private final Connection connection = Utils.getConnection();
 
+    private static final Logger log = LoggerFactory.getLogger(PlaylistRatingRepositoryImpl.class);
+
     @Override
     public void save(PlaylistRating playlistRating) {
         try {
@@ -25,7 +30,8 @@ public class PlaylistRatingRepositoryImpl implements PlaylistRatingRepository {
             preparedStatement.setBoolean(7, playlistRating.isLiked());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while saving rating playlist", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -42,7 +48,8 @@ public class PlaylistRatingRepositoryImpl implements PlaylistRatingRepository {
                 return null;
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while retrieving playlist rating", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -66,7 +73,8 @@ public class PlaylistRatingRepositoryImpl implements PlaylistRatingRepository {
             preparedStatement.setObject(4, userId);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while updating playlist rating", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -78,7 +86,8 @@ public class PlaylistRatingRepositoryImpl implements PlaylistRatingRepository {
             preparedStatement.setObject(2, userId);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while deleting playlist rating", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 }

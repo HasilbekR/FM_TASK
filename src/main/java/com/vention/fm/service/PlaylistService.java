@@ -4,12 +4,12 @@ import com.vention.fm.domain.dto.playlist.*;
 import com.vention.fm.domain.model.playlist.Playlist;
 import com.vention.fm.domain.model.playlist.PlaylistRating;
 import com.vention.fm.domain.model.user.User;
+import com.vention.fm.exception.AccessRestrictedException;
 import com.vention.fm.exception.DataNotFoundException;
 import com.vention.fm.repository.playlist.PlaylistRepository;
 import com.vention.fm.repository.playlist.PlaylistRepositoryImpl;
 import com.vention.fm.utils.MapStruct;
 
-import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,10 +19,10 @@ public class PlaylistService {
     private final PlaylistRatingService playlistRatingService = new PlaylistRatingService();
     private final MapStruct mapStruct = MapStruct.INSTANCE;
 
-    public String save(PlaylistCreateDto playlistDto) throws AccessDeniedException {
+    public String save(PlaylistCreateDto playlistDto) throws AccessRestrictedException {
         User user = userService.getUserState(playlistDto.getUserId());
         if (user.getIsBlocked()) {
-            throw new AccessDeniedException("Blocked users are not allowed to create a new playlist");
+            throw new AccessRestrictedException("Blocked users are not allowed to create a new playlist");
         }
         Playlist playlist = Playlist.builder()
                 .name(playlistDto.getName())
@@ -78,11 +78,11 @@ public class PlaylistService {
         playlistRepository.rate(likeCount, dislikeCount, playlistId);
     }
 
-    public String update(PlaylistUpdateDto playlistDto) throws AccessDeniedException {
+    public String update(PlaylistUpdateDto playlistDto) throws AccessRestrictedException {
         Playlist playlist = playlistRepository.getPlaylistByName(playlistDto.getName());
         if (playlist != null) {
             if (!playlist.getOwner().getId().equals(playlistDto.getUserId())) {
-                throw new AccessDeniedException("You do not have access to update this playlist");
+                throw new AccessRestrictedException("You do not have access to update this playlist");
             }
             if(playlistDto.getIsPublic() != null){
                 playlist.setIsPublic(playlistDto.getIsPublic());
@@ -97,14 +97,14 @@ public class PlaylistService {
         }
     }
 
-    public String delete(String playlistName, UUID ownerId) throws AccessDeniedException {
+    public String delete(String playlistName, UUID ownerId) throws AccessRestrictedException {
         Playlist playlistByName = playlistRepository.getPlaylistByName(playlistName);
         if (playlistByName != null) {
             if (playlistByName.getOwner().getId().equals(ownerId)) {
                 playlistRepository.delete(playlistByName.getId());
                 return "Playlist deleted successfully";
             } else {
-                throw new AccessDeniedException("You do not have access to DeleteAlbumServlet this playlist");
+                throw new AccessRestrictedException("You do not have access to DeleteAlbumServlet this playlist");
             }
         } else {
             throw new DataNotFoundException("Playlist with name " + playlistName + " not found");

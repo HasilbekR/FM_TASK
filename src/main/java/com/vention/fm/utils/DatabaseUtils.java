@@ -1,16 +1,21 @@
 package com.vention.fm.utils;
 
 import com.vention.fm.domain.model.BaseModel;
+import com.vention.fm.exception.BadRequestException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class DatabaseUtils {
+    private static final Logger log = LoggerFactory.getLogger(DatabaseUtils.class);
+
     public static void setValues(PreparedStatement preparedStatement, BaseModel baseModel) throws SQLException {
         preparedStatement.setObject(1, baseModel.getId());
-        preparedStatement.setObject(2, baseModel.getCreatedDate());
-        preparedStatement.setObject(3, baseModel.getUpdatedDate());
+        preparedStatement.setTimestamp(2, Timestamp.valueOf(baseModel.getCreatedDate()));
+        preparedStatement.setTimestamp(3, Timestamp.valueOf(baseModel.getUpdatedDate()));
         preparedStatement.setBoolean(4, baseModel.getIsBlocked());
     }
 
@@ -26,7 +31,8 @@ public class DatabaseUtils {
                 return true;
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while retrieving data from database", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -41,7 +47,8 @@ public class DatabaseUtils {
                 return 0;
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while retrieving data from database", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -53,19 +60,23 @@ public class DatabaseUtils {
             preparedStatement.setObject(3, id);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while retrieving data from database", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
-    public static void removeTrack(UUID id, UUID trackId, Connection connection, String query){
+
+    public static void removeTrack(UUID id, UUID trackId, Connection connection, String query) {
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(query);
             preparedStatement.setObject(1, id);
             preparedStatement.setObject(2, trackId);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while retrieving data from database", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
+
     public static void block(Boolean isBlocked, String name, Connection connection, String query) {
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(query);
@@ -73,7 +84,8 @@ public class DatabaseUtils {
             preparedStatement.setString(2, name);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while retrieving data from database", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 }

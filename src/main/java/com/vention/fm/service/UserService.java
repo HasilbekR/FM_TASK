@@ -46,10 +46,6 @@ public class UserService {
         }
     }
 
-    public User getById(UUID userId) {
-        return userRepository.getById(userId);
-    }
-
     public User getUserState(UUID userId) {
         boolean isBlocked = userRepository.isBlocked(userId);
         User user = new User();
@@ -82,10 +78,6 @@ public class UserService {
         } else {
             throw new DataNotFoundException("User not found");
         }
-    }
-
-    public boolean isBlocked(UUID userId) {
-        return userRepository.isBlocked(userId);
     }
 
     public void blockUser(Boolean isBlocked, String username) {

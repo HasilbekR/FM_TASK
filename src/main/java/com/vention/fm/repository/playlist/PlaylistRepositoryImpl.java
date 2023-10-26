@@ -1,9 +1,12 @@
 package com.vention.fm.repository.playlist;
 
 import com.vention.fm.domain.model.playlist.Playlist;
+import com.vention.fm.exception.BadRequestException;
 import com.vention.fm.utils.DatabaseUtils;
 import com.vention.fm.utils.Utils;
 import com.vention.fm.utils.ResultSetMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -16,6 +19,7 @@ import java.util.UUID;
 
 public class PlaylistRepositoryImpl implements PlaylistRepository {
     private final Connection connection = Utils.getConnection();
+    private static final Logger log = LoggerFactory.getLogger(PlaylistRepositoryImpl.class);
 
     @Override
     public void save(Playlist playlist) {
@@ -29,7 +33,8 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
             preparedStatement.setObject(9, playlist.getOwner().getId());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while saving playlist", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -45,7 +50,8 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
                 return null;
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while retrieving playlist", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -61,7 +67,8 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
                 return null;
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while retrieving playlist", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -77,7 +84,8 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
                 return null;
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while retrieving playlist state", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -93,7 +101,8 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
             }
             return playlists;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while retrieving playlists", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -108,7 +117,8 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
             }
             return playlists;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while retrieving available playlists", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -123,7 +133,8 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
             preparedStatement.setObject(5, playlist.getId());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while updating playlist", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -137,7 +148,8 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
             preparedStatement.setObject(4, playlistId);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while rating playlist", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -148,7 +160,8 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
             preparedStatement.setObject(1, id);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while deleting playlist", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 }

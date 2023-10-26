@@ -1,5 +1,6 @@
 package com.vention.fm.servlets.artist;
 
+import com.vention.fm.exception.BadRequestException;
 import com.vention.fm.service.ArtistService;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -13,9 +14,13 @@ public class BlockArtistServlet extends HttpServlet {
     private final ArtistService artistService = new ArtistService();
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String artistName = req.getParameter("name");
-        artistService.blockArtist(true, artistName);
-        resp.getWriter().print("Artist with name " + artistName + " is blocked");
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
+        try {
+            String artistName = req.getParameter("name");
+            artistService.blockArtist(true, artistName);
+            resp.getWriter().print("Artist with name " + artistName + " is blocked");
+        } catch (IOException e) {
+            throw new BadRequestException(e.getMessage());
+        }
     }
 }

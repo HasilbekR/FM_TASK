@@ -1,5 +1,6 @@
 package com.vention.fm.servlets.track;
 
+import com.vention.fm.exception.BadRequestException;
 import com.vention.fm.service.TrackService;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -13,10 +14,14 @@ public class SaveTopTracksByArtistServlet extends HttpServlet {
     private final TrackService trackService = new TrackService();
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String page = req.getParameter("page");
-        String artist = req.getParameter("artist");
-        String tracks = trackService.saveTopTracksByArtist(artist, page);
-        resp.getWriter().print(tracks);
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
+        try {
+            String page = req.getParameter("page");
+            String artist = req.getParameter("artist");
+            String tracks = trackService.saveTopTracksByArtist(artist, page);
+            resp.getWriter().print(tracks);
+        } catch (IOException e) {
+            throw new BadRequestException(e.getMessage());
+        }
     }
 }

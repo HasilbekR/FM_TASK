@@ -7,11 +7,12 @@ import com.vention.fm.domain.dto.track.TrackDto;
 import com.vention.fm.domain.model.album.Album;
 import com.vention.fm.domain.model.album.AlbumTracks;
 import com.vention.fm.domain.model.track.Track;
+import com.vention.fm.exception.AccessRestrictedException;
 import com.vention.fm.repository.album_tracks.AlbumTracksRepository;
 import com.vention.fm.repository.album_tracks.AlbumTracksRepositoryImpl;
 import com.vention.fm.utils.MapStruct;
 
-import java.nio.file.AccessDeniedException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -22,17 +23,18 @@ public class AlbumTracksService {
     private final ArtistService artistService = new ArtistService();
     private final TrackService trackService = new TrackService();
     private final MapStruct mapStruct = MapStruct.INSTANCE;
+
     //In this method I used DTOs to avoid sending multiple request to database as I need ids and is_blocked states
-    public String save(AlbumAddTrackDto trackDto) throws AccessDeniedException {
+    public String save(AlbumAddTrackDto trackDto) throws AccessRestrictedException {
         Track trackState = trackService.getTrackState(trackDto.getTrackName());
         if (trackState.getIsBlocked()) {
-            throw new AccessDeniedException("Blocked tracks cannot be added into album");
+            throw new AccessRestrictedException("Blocked tracks cannot be added into album");
         }
 
         Album albumState = albumService.getAlbumState(trackDto.getAlbumName(), trackDto.getUserId());
         boolean isArtistBlocked = artistService.isBlocked(trackState.getArtist().getId());
         if (isArtistBlocked) {
-            throw new AccessDeniedException("Blocked artist cannot be added into album");
+            throw new AccessRestrictedException("Blocked artist cannot be added into album");
         }
 
         int count = albumTracksRepository.getCount(albumState.getId());
@@ -44,7 +46,7 @@ public class AlbumTracksService {
                             .trackPosition(count + 1)
                             .build());
         } else {
-            throw new AccessDeniedException("Album should have tracks from one artist and no more than 10");
+            throw new AccessRestrictedException("Album should have tracks from one artist and no more than 10");
         }
         return "Track with name " + trackDto.getTrackName() + " successfully added to album " + trackDto.getAlbumName();
     }
@@ -60,13 +62,17 @@ public class AlbumTracksService {
 
     public List<TrackDto> getAlbumTracks(UUID albumId) {
         List<AlbumTracks> albumTracks = albumTracksRepository.getAlbumTracks(albumId);
-        List<TrackDto> trackDtoList = new LinkedList<>();
-        for (AlbumTracks albumTrack : albumTracks) {
-            TrackDto trackDto = mapStruct.trackToDto(albumTrack.getTrack());
-            trackDto.setPosition(albumTrack.getTrackPosition());
-            trackDtoList.add(trackDto);
+        if (albumTracks != null) {
+            List<TrackDto> trackDtoList = new LinkedList<>();
+            for (AlbumTracks albumTrack : albumTracks) {
+                TrackDto trackDto = mapStruct.trackToDto(albumTrack.getTrack());
+                trackDto.setPosition(albumTrack.getTrackPosition());
+                trackDtoList.add(trackDto);
+            }
+            return trackDtoList;
+        } else {
+            return new ArrayList<>();
         }
-        return trackDtoList;
     }
 
     public String removeTrack(AlbumRemoveTrackDto albumTrackDto) {

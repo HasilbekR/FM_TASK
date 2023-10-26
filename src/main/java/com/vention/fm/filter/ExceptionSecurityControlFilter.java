@@ -1,17 +1,14 @@
 package com.vention.fm.filter;
 
-import com.vention.fm.exception.AuthenticationFailedException;
-import com.vention.fm.exception.UniqueObjectException;
+import com.vention.fm.exception.*;
 import com.vention.fm.service.UserService;
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import com.vention.fm.exception.DataNotFoundException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.nio.file.AccessDeniedException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -50,7 +47,7 @@ public class ExceptionSecurityControlFilter implements Filter {
                 verifyAdmin(UUID.fromString(httpRequest.getParameter("userId")));
             }
             chain.doFilter(request, response);
-        } catch (AuthenticationFailedException | AccessDeniedException e) {
+        } catch (AuthenticationFailedException | AccessRestrictedException e) {
             httpResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
             httpResponse.setContentType("application/json");
 
@@ -58,7 +55,7 @@ public class ExceptionSecurityControlFilter implements Filter {
             jsonResponse.put("error message", e.getMessage());
 
             response.getWriter().write(jsonResponse.toString());
-        } catch (UniqueObjectException e) {
+        } catch (UniqueObjectException | BadRequestException e) {
             httpResponse.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             httpResponse.setContentType("application/json");
 
@@ -83,8 +80,8 @@ public class ExceptionSecurityControlFilter implements Filter {
         Filter.super.destroy();
     }
 
-    private static void verifyAdmin(UUID adminId) throws AccessDeniedException {
+    private static void verifyAdmin(UUID adminId) throws AccessRestrictedException {
         String userRole = userService.getUserRole(adminId);
-        if (!Objects.equals(userRole, "ADMINISTRATOR")) throw new AccessDeniedException("Access denied");
+        if (!Objects.equals(userRole, "ADMINISTRATOR")) throw new AccessRestrictedException("Access denied");
     }
 }

@@ -3,6 +3,7 @@ package com.vention.fm.utils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.vention.fm.exception.BadRequestException;
 import com.vention.fm.exception.DataNotFoundException;
 
 import java.io.IOException;
@@ -31,7 +32,7 @@ public class Utils {
                 Class.forName(DRIVER);
                 connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
             } catch (SQLException | ClassNotFoundException | IOException e) {
-                throw new RuntimeException(e);
+                throw new BadRequestException(e.getMessage());
             }
         }
         return connection;
@@ -52,7 +53,7 @@ public class Utils {
             properties.load(inputStream);
             if (Objects.equals(request, "/url")) return properties.getProperty("LOADER_URL");
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new BadRequestException(e.getMessage());
         }
         throw new DataNotFoundException("Invalid request");
     }

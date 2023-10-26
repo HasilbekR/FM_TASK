@@ -1,9 +1,12 @@
 package com.vention.fm.repository.playlist_tracks;
 
 import com.vention.fm.domain.model.playlist.PlaylistTracks;
+import com.vention.fm.exception.BadRequestException;
 import com.vention.fm.utils.DatabaseUtils;
 import com.vention.fm.utils.Utils;
 import com.vention.fm.utils.ResultSetMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -16,6 +19,8 @@ import java.util.UUID;
 public class PlaylistTracksRepositoryImpl implements PlaylistTracksRepository {
     private final Connection connection = Utils.getConnection();
 
+    private static final Logger log = LoggerFactory.getLogger(PlaylistTracksRepositoryImpl.class);
+
     @Override
     public void save(PlaylistTracks playlistTracks) {
         try {
@@ -26,7 +31,8 @@ public class PlaylistTracksRepositoryImpl implements PlaylistTracksRepository {
             preparedStatement.setInt(7, playlistTracks.getTrackPosition());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while saving track to playlist", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -42,7 +48,8 @@ public class PlaylistTracksRepositoryImpl implements PlaylistTracksRepository {
                 return null;
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while retrieving playlist track", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -58,7 +65,8 @@ public class PlaylistTracksRepositoryImpl implements PlaylistTracksRepository {
             }
             return playlistTracksList;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while retrieving playlist tracks", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -76,7 +84,8 @@ public class PlaylistTracksRepositoryImpl implements PlaylistTracksRepository {
             }
             return playlistTracksList;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while retrieving playlist tracks for reordering", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 

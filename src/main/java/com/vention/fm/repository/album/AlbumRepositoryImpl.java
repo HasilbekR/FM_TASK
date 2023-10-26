@@ -1,9 +1,12 @@
 package com.vention.fm.repository.album;
 
 import com.vention.fm.domain.model.album.Album;
+import com.vention.fm.exception.BadRequestException;
 import com.vention.fm.utils.DatabaseUtils;
 import com.vention.fm.utils.Utils;
 import com.vention.fm.utils.ResultSetMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -16,6 +19,7 @@ import java.util.UUID;
 
 public class AlbumRepositoryImpl implements AlbumRepository {
     private final Connection connection = Utils.getConnection();
+    private static final Logger log = LoggerFactory.getLogger(AlbumRepositoryImpl.class);
 
     @Override
     public void save(Album album) {
@@ -27,7 +31,8 @@ public class AlbumRepositoryImpl implements AlbumRepository {
             preparedStatement.setObject(7, album.getOwner().getId());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while saving album", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -43,7 +48,8 @@ public class AlbumRepositoryImpl implements AlbumRepository {
                 return null;
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while retrieving album", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -60,7 +66,8 @@ public class AlbumRepositoryImpl implements AlbumRepository {
                 return null;
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while retrieving album state", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -77,7 +84,8 @@ public class AlbumRepositoryImpl implements AlbumRepository {
                 return null;
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while retrieving album", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -93,7 +101,8 @@ public class AlbumRepositoryImpl implements AlbumRepository {
             }
             return albums;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while retrieving artist", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -106,7 +115,8 @@ public class AlbumRepositoryImpl implements AlbumRepository {
             preparedStatement.setObject(3, album.getId());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while updating album", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -117,7 +127,8 @@ public class AlbumRepositoryImpl implements AlbumRepository {
             preparedStatement.setObject(1, albumId);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while deleting album", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 }

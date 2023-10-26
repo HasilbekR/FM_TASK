@@ -6,6 +6,7 @@ import com.vention.fm.domain.dto.track.TrackDto;
 import com.vention.fm.domain.dto.track.TrackSaveDto;
 import com.vention.fm.domain.model.artist.Artist;
 import com.vention.fm.domain.model.track.Track;
+import com.vention.fm.exception.BadRequestException;
 import com.vention.fm.exception.DataNotFoundException;
 import com.vention.fm.repository.track.TrackRepository;
 import com.vention.fm.repository.track.TrackRepositoryImpl;
@@ -31,9 +32,6 @@ public class TrackService {
 
     public TrackDto createTrack(TrackSaveDto trackSaveDto) {
         Artist artistByName = artistService.getArtistByName(trackSaveDto.getArtist());
-        if (artistByName == null) {
-            throw new DataNotFoundException("Artist by name " + trackSaveDto.getArtist() + " not found");
-        }
         Track track = mapStruct.trackDtoToTrack(trackSaveDto);
         track.setArtist(artistByName);
         track.setListeners(0);
@@ -66,7 +64,7 @@ public class TrackService {
         return mapStruct.tracksToDto(tracks);
     }
 
-    public String saveTopTracks(String page) throws IOException {
+    public String saveTopTracks(String page) {
         if (page == null) {
             page = "1";
         }
@@ -74,7 +72,7 @@ public class TrackService {
         return getTracks(apiUrl);
     }
 
-    public String saveTopTracksByArtist(String artist, String page) throws IOException {
+    public String saveTopTracksByArtist(String artist, String page) {
         if (page == null) {
             page = "1";
         }
@@ -131,20 +129,24 @@ public class TrackService {
         }
     }
 
-    private String getTracks(String apiUrl) throws IOException {
-        URL url = new URL(apiUrl);
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestMethod("GET");
-        connection.setRequestProperty("service", "main");
+    private String getTracks(String apiUrl) {
+        try {
+            URL url = new URL(apiUrl);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("service", "main");
 
-        int responseCode = connection.getResponseCode();
-        if (responseCode == HttpURLConnection.HTTP_OK) {
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-                List<Track> tracks = objectMapper.readValue(reader, new TypeReference<>() {
-                });
-                return objectMapper.writeValueAsString(saveAll(tracks));
+            int responseCode = connection.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+                    List<Track> tracks = objectMapper.readValue(reader, new TypeReference<>() {
+                    });
+                    return objectMapper.writeValueAsString(saveAll(tracks));
+                }
             }
+            return null;
+        } catch (IOException e) {
+            throw new BadRequestException(e.getMessage());
         }
-        return null;
     }
 }
