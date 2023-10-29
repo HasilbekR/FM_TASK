@@ -1,10 +1,12 @@
 package com.vention.fm.repository.playlist_rating;
 
 import com.vention.fm.domain.model.playlist.PlaylistRating;
-import com.vention.fm.exception.DataNotFoundException;
+import com.vention.fm.exception.BadRequestException;
 import com.vention.fm.utils.DatabaseUtils;
 import com.vention.fm.utils.Utils;
 import com.vention.fm.utils.ResultSetMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -16,43 +18,20 @@ import java.util.UUID;
 public class PlaylistRatingRepositoryImpl implements PlaylistRatingRepository {
     private final Connection connection = Utils.getConnection();
 
+    private static final Logger log = LoggerFactory.getLogger(PlaylistRatingRepositoryImpl.class);
+
     @Override
     public void save(PlaylistRating playlistRating) {
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(INSERT);
             DatabaseUtils.setValues(preparedStatement, playlistRating);
-            preparedStatement.setObject(5, playlistRating.getPlaylistId());
-            preparedStatement.setObject(6, playlistRating.getUserId());
-            preparedStatement.setBoolean(7, playlistRating.getIsLiked());
+            preparedStatement.setObject(5, playlistRating.getPlaylist().getId());
+            preparedStatement.setObject(6, playlistRating.getUser().getId());
+            preparedStatement.setBoolean(7, playlistRating.isLiked());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public void update(UUID playlistId, UUID userId, Boolean isLiked) {
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement(UPDATE);
-            preparedStatement.setObject(1, LocalDateTime.now());
-            preparedStatement.setBoolean(2, isLiked);
-            preparedStatement.setObject(3, playlistId);
-            preparedStatement.setObject(4, userId);
-            preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
-    public void delete(UUID playlistId, UUID userId) {
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement(DELETE);
-            preparedStatement.setObject(1, playlistId);
-            preparedStatement.setObject(2, userId);
-            preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while saving rating playlist", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -65,20 +44,50 @@ public class PlaylistRatingRepositoryImpl implements PlaylistRatingRepository {
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 return ResultSetMapper.mapPlaylistRating(resultSet);
+            } else {
+                return null;
             }
-            throw new DataNotFoundException("Playlist rating not found");
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while retrieving playlist rating", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
     @Override
     public int getLikeCount(UUID playlistId) {
-        return DatabaseUtils.getData(playlistId, connection, GET_LIKE_COUNT);
+        return DatabaseUtils.getPerformanceData(playlistId, connection, GET_LIKE_COUNT);
     }
 
     @Override
     public int getDislikeCount(UUID playlistId) {
-        return DatabaseUtils.getData(playlistId, connection, GET_DISLIKE_COUNT);
+        return DatabaseUtils.getPerformanceData(playlistId, connection, GET_DISLIKE_COUNT);
+    }
+
+    @Override
+    public void update(UUID playlistId, UUID userId, Boolean isLiked) {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(UPDATE);
+            preparedStatement.setObject(1, LocalDateTime.now());
+            preparedStatement.setBoolean(2, isLiked);
+            preparedStatement.setObject(3, playlistId);
+            preparedStatement.setObject(4, userId);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            log.error("Error occurred while updating playlist rating", e);
+            throw new BadRequestException(e.getMessage());
+        }
+    }
+
+    @Override
+    public void delete(UUID playlistId, UUID userId) {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(DELETE);
+            preparedStatement.setObject(1, playlistId);
+            preparedStatement.setObject(2, userId);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            log.error("Error occurred while deleting playlist rating", e);
+            throw new BadRequestException(e.getMessage());
+        }
     }
 }

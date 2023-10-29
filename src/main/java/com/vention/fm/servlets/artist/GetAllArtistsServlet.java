@@ -1,9 +1,9 @@
 package com.vention.fm.servlets.artist;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vention.fm.exception.BadRequestException;
 import com.vention.fm.service.ArtistService;
 import com.vention.fm.utils.Utils;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,8 +17,12 @@ public class GetAllArtistsServlet extends HttpServlet {
     private final ArtistService artistService = new ArtistService();
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String json = objectMapper.writeValueAsString(artistService.getAll());
-        resp.getWriter().print(json);
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
+        try {
+            String json = objectMapper.writeValueAsString(artistService.getAll());
+            resp.getWriter().print(json);
+        } catch (IOException e) {
+            throw new BadRequestException(e.getMessage());
+        }
     }
 }

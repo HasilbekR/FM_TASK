@@ -6,34 +6,37 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ArtistRepository {
-    String GET_ID_BY_NAME = "select id from artists where name =?";
-    String GET_BY_NAME = "select * from artists where name = ?";
+    String INSERT = "insert into artists(id, created_date, updated_date, is_blocked, name, url, playcount, listeners) values(?, ?, ?, ?, ?, ?, ?, ?)";
     String GET_BY_ID = "select * from artists where id = ?";
+    String GET_BY_NAME = "select * from artists where name = ?";
+    String GET_ARTIST_STATE = "select id, is_blocked from artists where name = ?";
     String GET_ALL = "select * from artists";
-    String INSERT = "insert into artists(id, created_date, updated_date, is_blocked, name, url, playcount, listeners) values(?,?,?,?,?,?,?,?)";
-    String UPDATE = "UPDATE artists SET updated_date=?, playcount=?, listeners=? WHERE id=?";
-    String GET_PLAY_COUNT = "select playcount from artists where id =? ";
+    String GET_ID_BY_NAME = "select id from artists where name = ?";
+    String GET_PLAY_COUNT = "select playcount from artists where id = ? ";
     String GET_LISTENERS = "select listeners from artists where id = ?";
-    String BLOCK_ARTIST = "update artists set is_blocked = ? where id = ?";
     String IS_BLOCKED = "select is_blocked from artists where id = ?";
-
-    Artist getArtistByName(String name);
-
-    UUID getIdByName(String name);
-
-    List<Artist> getAll();
+    String UPDATE = "update artists set updated_date = ?, playcount = ?, listeners = ? where id = ?";
+    String BLOCK_ARTIST = "update artists set is_blocked = ? where name = ?";
 
     void save(Artist artist);
 
-    void update(Artist artist);
-
     Artist getArtistById(UUID id);
 
-    void blockArtist(Boolean isBlocked, UUID artistId);
+    Artist getArtistByName(String name);
+
+    Artist getArtistState(String name);
+
+    List<Artist> getAll();
+
+    UUID getIdByName(String name);
 
     int getPlayCount(UUID artistId);
 
     int getListeners(UUID artistId);
 
-    Boolean isBlocked(UUID artistId);
+    boolean isBlocked(UUID artistId);
+
+    void update(Artist artist);
+
+    void blockArtist(Boolean isBlocked, String artistName);
 }

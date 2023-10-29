@@ -14,5 +14,5 @@ import java.util.UUID;
 public class PlaylistCreateDto {
     private String name;
     private Boolean isPublic;
-    private UUID ownerId;
+    private UUID userId;
 }

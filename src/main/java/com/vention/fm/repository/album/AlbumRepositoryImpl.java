@@ -1,36 +1,92 @@
 package com.vention.fm.repository.album;
 
 import com.vention.fm.domain.model.album.Album;
-import com.vention.fm.exception.DataNotFoundException;
+import com.vention.fm.exception.BadRequestException;
 import com.vention.fm.utils.DatabaseUtils;
 import com.vention.fm.utils.Utils;
 import com.vention.fm.utils.ResultSetMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 public class AlbumRepositoryImpl implements AlbumRepository {
     private final Connection connection = Utils.getConnection();
+    private static final Logger log = LoggerFactory.getLogger(AlbumRepositoryImpl.class);
 
     @Override
-    public Album getByName(String name, UUID ownerId) {
+    public void save(Album album) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(GET_BY_NAME);
-            preparedStatement.setString(1, name);
+            PreparedStatement preparedStatement = connection.prepareStatement(INSERT);
+            DatabaseUtils.setValues(preparedStatement, album);
+            preparedStatement.setString(5, album.getName());
+            preparedStatement.setObject(6, album.getArtist().getId());
+            preparedStatement.setObject(7, album.getOwner().getId());
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            log.error("Error occurred while saving album", e);
+            throw new BadRequestException(e.getMessage());
+        }
+    }
+
+    @Override
+    public Album getById(UUID id) {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(GET_BY_ID);
+            preparedStatement.setObject(1, id);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return ResultSetMapper.mapAlbum(resultSet);
+            } else {
+                return null;
+            }
+        } catch (SQLException e) {
+            log.error("Error occurred while retrieving album", e);
+            throw new BadRequestException(e.getMessage());
+        }
+    }
+
+    @Override
+    public Album getAlbumState(String albumName, UUID ownerId) {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(GET_ALBUM_STATE);
+            preparedStatement.setString(1, albumName);
+            preparedStatement.setObject(2, ownerId);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return ResultSetMapper.mapAlbumState(resultSet);
+            } else {
+                return null;
+            }
+        } catch (SQLException e) {
+            log.error("Error occurred while retrieving album state", e);
+            throw new BadRequestException(e.getMessage());
+        }
+    }
+
+    @Override
+    public Album getAlbum(String albumName, UUID ownerId) {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(GET_ALBUM);
+            preparedStatement.setString(1, albumName);
             preparedStatement.setObject(2, ownerId);
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 return ResultSetMapper.mapAlbum(resultSet);
+            } else {
+                return null;
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while retrieving album", e);
+            throw new BadRequestException(e.getMessage());
         }
-        throw new DataNotFoundException("Album with name " + name + " not found");
     }
 
     @Override
@@ -45,32 +101,23 @@ public class AlbumRepositoryImpl implements AlbumRepository {
             }
             return albums;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while retrieving artist", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
     @Override
-    public void save(Album album) {
+    public void update(Album album) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(INSERT);
-            DatabaseUtils.setValues(preparedStatement, album);
-            preparedStatement.setString(5, album.getName());
-            preparedStatement.setObject(6, album.getArtistId());
-            preparedStatement.setObject(7, album.getOwnerId());
+            PreparedStatement preparedStatement = connection.prepareStatement(UPDATE);
+            preparedStatement.setObject(1, LocalDateTime.now());
+            preparedStatement.setString(2, album.getName());
+            preparedStatement.setObject(3, album.getId());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while updating album", e);
+            throw new BadRequestException(e.getMessage());
         }
-    }
-
-    @Override
-    public UUID getArtistId(UUID id) {
-        return getId(id, GET_ARTIST_ID);
-    }
-
-    @Override
-    public UUID getOwnerId(UUID albumId) {
-        return getId(albumId, GET_OWNER_ID);
     }
 
     @Override
@@ -80,21 +127,8 @@ public class AlbumRepositoryImpl implements AlbumRepository {
             preparedStatement.setObject(1, albumId);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while deleting album", e);
+            throw new BadRequestException(e.getMessage());
         }
-    }
-
-    private UUID getId(UUID albumId, String query) {
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setObject(1, albumId);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                return resultSet.getObject(1, UUID.class);
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        throw new DataNotFoundException("Album not found");
     }
 }

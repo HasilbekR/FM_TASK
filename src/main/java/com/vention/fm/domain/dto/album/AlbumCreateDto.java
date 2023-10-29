@@ -13,6 +13,6 @@ import java.util.UUID;
 @NoArgsConstructor
 public class AlbumCreateDto {
     private String name;
-    private String artist;
-    private UUID ownerId;
+    private String artistName;
+    private UUID userId;
 }

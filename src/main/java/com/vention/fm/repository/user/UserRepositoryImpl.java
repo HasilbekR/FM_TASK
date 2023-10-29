@@ -1,10 +1,12 @@
 package com.vention.fm.repository.user;
 
-import com.vention.fm.domain.model.user.UserEntity;
-import com.vention.fm.exception.DataNotFoundException;
+import com.vention.fm.domain.model.user.User;
+import com.vention.fm.exception.BadRequestException;
 import com.vention.fm.utils.DatabaseUtils;
 import com.vention.fm.utils.Utils;
 import com.vention.fm.utils.ResultSetMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.util.LinkedList;
@@ -13,44 +15,66 @@ import java.util.UUID;
 
 public class UserRepositoryImpl implements UserRepository {
     private final Connection connection = Utils.getConnection();
+    private static final Logger log = LoggerFactory.getLogger(UserRepositoryImpl.class);
 
     @Override
-    public UserEntity getByUsername(String username) {
+    public void save(User user) {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(INSERT);
+            DatabaseUtils.setValues(preparedStatement, user);
+            preparedStatement.setString(5, user.getUsername());
+            preparedStatement.setString(6, user.getEmail());
+            preparedStatement.setString(7, user.getPassword());
+            preparedStatement.setBoolean(8, user.getIsVerified());
+            preparedStatement.setObject(9, user.getRole(), Types.OTHER);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            log.error("Error occurred while saving user", e);
+            throw new BadRequestException(e.getMessage());
+        }
+    }
+
+    @Override
+    public User getById(UUID userId) {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(GET_BY_ID);
+            preparedStatement.setObject(1, userId);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return ResultSetMapper.mapUser(resultSet);
+            } else {
+                return null;
+            }
+        } catch (SQLException e) {
+            log.error("Error occurred while retrieving user", e);
+            throw new BadRequestException(e.getMessage());
+        }
+    }
+
+    @Override
+    public User getByUsername(String username) {
         return getUserEntity(username, GET_BY_USERNAME);
     }
 
     @Override
-    public UserEntity getByEmail(String email) {
+    public User getByEmail(String email) {
         return getUserEntity(email, GET_BY_EMAIL);
     }
 
-    private UserEntity getUserEntity(String email, String getByEmail) {
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement(getByEmail);
-            preparedStatement.setString(1, email);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                return ResultSetMapper.mapUser(resultSet);
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        throw new DataNotFoundException("Invalid username or email");
-    }
-
     @Override
-    public void save(UserEntity userEntity) {
+    public List<User> getAllUsers(Boolean isBlocked) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(INSERT);
-            DatabaseUtils.setValues(preparedStatement, userEntity);
-            preparedStatement.setString(5, userEntity.getUsername());
-            preparedStatement.setString(6, userEntity.getEmail());
-            preparedStatement.setString(7, userEntity.getPassword());
-            preparedStatement.setBoolean(8, userEntity.getIsVerified());
-            preparedStatement.setObject(9, userEntity.getRole(), Types.OTHER);
-            preparedStatement.executeUpdate();
+            PreparedStatement preparedStatement = connection.prepareStatement(GET_ALL_USERS);
+            preparedStatement.setObject(1, isBlocked);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            List<User> users = new LinkedList<>();
+            while (resultSet.next()) {
+                users.add(ResultSetMapper.mapUser(resultSet));
+            }
+            return users;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while retrieving users", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
@@ -62,36 +86,38 @@ public class UserRepositoryImpl implements UserRepository {
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 return resultSet.getString(1);
+            } else {
+                return null;
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while retrieving user role", e);
+            throw new BadRequestException(e.getMessage());
         }
-        throw new DataNotFoundException("User not found");
     }
 
     @Override
-    public Boolean isBlocked(UUID userId) {
+    public boolean isBlocked(UUID userId) {
         return DatabaseUtils.isBlocked(userId, connection, IS_BLOCKED);
     }
 
     @Override
-    public void blockUser(Boolean isBlocked, UUID userId) {
-        DatabaseUtils.block(isBlocked, userId, connection, BLOCK_USER);
+    public void blockUser(Boolean isBlocked, String username) {
+        DatabaseUtils.block(isBlocked, username, connection, BLOCK_USER);
     }
 
-    @Override
-    public List<UserEntity> getAllUsers(Boolean isBlocked) {
+    private User getUserEntity(String email, String getByEmail) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(GET_ALL_USERS);
-            preparedStatement.setObject(1, isBlocked);
+            PreparedStatement preparedStatement = connection.prepareStatement(getByEmail);
+            preparedStatement.setString(1, email);
             ResultSet resultSet = preparedStatement.executeQuery();
-            List<UserEntity> users = new LinkedList<>();
-            while (resultSet.next()) {
-                users.add(ResultSetMapper.mapUser(resultSet));
+            if (resultSet.next()) {
+                return ResultSetMapper.mapUser(resultSet);
+            } else {
+                return null;
             }
-            return users;
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while retrieving user", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 }

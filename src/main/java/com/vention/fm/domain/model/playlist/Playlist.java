@@ -1,9 +1,9 @@
 package com.vention.fm.domain.model.playlist;
 
 import com.vention.fm.domain.model.BaseModel;
+import com.vention.fm.domain.model.user.User;
 import lombok.*;
 
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -15,5 +15,5 @@ public class Playlist extends BaseModel {
     private Boolean isPublic;
     private Integer likeCount;
     private Integer dislikeCount;
-    private UUID ownerId;
+    private User owner;
 }

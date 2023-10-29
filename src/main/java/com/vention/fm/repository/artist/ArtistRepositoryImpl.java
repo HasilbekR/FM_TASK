@@ -1,11 +1,12 @@
 package com.vention.fm.repository.artist;
 
 import com.vention.fm.domain.model.artist.Artist;
-import com.vention.fm.exception.DataNotFoundException;
-import com.vention.fm.repository.user.UserRepositoryImpl;
+import com.vention.fm.exception.BadRequestException;
 import com.vention.fm.utils.DatabaseUtils;
 import com.vention.fm.utils.Utils;
 import com.vention.fm.utils.ResultSetMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -14,51 +15,7 @@ import java.util.UUID;
 
 public class ArtistRepositoryImpl implements ArtistRepository {
     private final Connection connection = Utils.getConnection();
-
-    @Override
-    public Artist getArtistByName(String name) {
-        try {
-            PreparedStatement statement = connection.prepareStatement(GET_BY_NAME);
-            statement.setString(1, name);
-            ResultSet resultSet = statement.executeQuery();
-            if (resultSet.next()) {
-                return ResultSetMapper.mapArtist(resultSet);
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        throw new DataNotFoundException("Artist with name " + name + " not found");
-    }
-
-    @Override
-    public UUID getIdByName(String name) {
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement(GET_ID_BY_NAME);
-            preparedStatement.setString(1, name);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                return resultSet.getObject(1, UUID.class);
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        throw new DataNotFoundException("Artist with name " + name + " not found");
-    }
-
-    @Override
-    public List<Artist> getAll() {
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement(GET_ALL);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            List<Artist> artists = new ArrayList<>();
-            while (resultSet.next()) {
-                artists.add(ResultSetMapper.mapArtist(resultSet));
-            }
-            return artists;
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
+    private static final Logger log = LoggerFactory.getLogger(ArtistRepositoryImpl.class);
 
     @Override
     public void save(Artist artist) {
@@ -79,8 +36,108 @@ public class ArtistRepositoryImpl implements ArtistRepository {
             }
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while saving artist", e);
+            throw new BadRequestException(e.getMessage());
         }
+    }
+
+    @Override
+    public Artist getArtistById(UUID id) {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(GET_BY_ID);
+            preparedStatement.setObject(1, id);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return ResultSetMapper.mapArtist(resultSet);
+            } else {
+                return null;
+            }
+        } catch (SQLException e) {
+            log.error("Error occurred while retrieving artist", e);
+            throw new BadRequestException(e.getMessage());
+        }
+    }
+
+    @Override
+    public Artist getArtistByName(String name) {
+        try {
+            PreparedStatement statement = connection.prepareStatement(GET_BY_NAME);
+            statement.setString(1, name);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return ResultSetMapper.mapArtist(resultSet);
+            } else {
+                return null;
+            }
+        } catch (SQLException e) {
+            log.error("Error occurred while retrieving artist", e);
+            throw new BadRequestException(e.getMessage());
+        }
+    }
+
+    @Override
+    public Artist getArtistState(String name) {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(GET_ARTIST_STATE);
+            preparedStatement.setString(1, name);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return ResultSetMapper.mapArtistState(resultSet);
+            } else {
+                return null;
+            }
+        } catch (SQLException e) {
+            log.error("Error occurred while retrieving artist state", e);
+            throw new BadRequestException(e.getMessage());
+        }
+    }
+
+    @Override
+    public List<Artist> getAll() {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(GET_ALL);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            List<Artist> artists = new ArrayList<>();
+            while (resultSet.next()) {
+                artists.add(ResultSetMapper.mapArtist(resultSet));
+            }
+            return artists;
+        } catch (SQLException e) {
+            log.error("Error occurred while retrieving artists", e);
+            throw new BadRequestException(e.getMessage());
+        }
+    }
+
+    @Override
+    public UUID getIdByName(String name) {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement(GET_ID_BY_NAME);
+            preparedStatement.setString(1, name);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getObject(1, UUID.class);
+            } else {
+                return null;
+            }
+        } catch (SQLException e) {
+            log.error("Error occurred while retrieving artist id", e);
+            throw new BadRequestException(e.getMessage());
+        }
+    }
+
+    @Override
+    public int getPlayCount(UUID artistId) {
+        return DatabaseUtils.getPerformanceData(artistId, connection, GET_PLAY_COUNT);
+    }
+
+    @Override
+    public int getListeners(UUID artistId) {
+        return DatabaseUtils.getPerformanceData(artistId, connection, GET_LISTENERS);
+    }
+
+    @Override
+    public boolean isBlocked(UUID artistId) {
+        return DatabaseUtils.isBlocked(artistId, connection, IS_BLOCKED);
     }
 
     @Override
@@ -101,42 +158,13 @@ public class ArtistRepositoryImpl implements ArtistRepository {
             preparedStatement.setObject(4, artist.getId());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            log.error("Error occurred while updating artist", e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 
     @Override
-    public Artist getArtistById(UUID id) {
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement(GET_BY_ID);
-            preparedStatement.setObject(1, id);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                return ResultSetMapper.mapArtist(resultSet);
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        throw new DataNotFoundException("Artist not found");
-    }
-
-    @Override
-    public void blockArtist(Boolean isBlocked, UUID artistId) {
-        DatabaseUtils.block(isBlocked, artistId, connection, BLOCK_ARTIST);
-    }
-
-    @Override
-    public int getPlayCount(UUID artistId) {
-        return DatabaseUtils.getData(artistId, connection, GET_PLAY_COUNT);
-    }
-
-    @Override
-    public int getListeners(UUID artistId) {
-        return DatabaseUtils.getData(artistId, connection, GET_LISTENERS);
-    }
-
-    @Override
-    public Boolean isBlocked(UUID artistId) {
-        return DatabaseUtils.isBlocked(artistId, connection, IS_BLOCKED);
+    public void blockArtist(Boolean isBlocked, String artistName) {
+        DatabaseUtils.block(isBlocked, artistName, connection, BLOCK_ARTIST);
     }
 }

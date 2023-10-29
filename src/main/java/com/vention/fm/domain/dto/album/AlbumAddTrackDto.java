@@ -6,7 +6,7 @@ import java.util.UUID;
 
 @Data
 public class AlbumAddTrackDto {
-    private UUID albumId;
-    private UUID trackId;
-    private UUID ownerId;
+    private String albumName;
+    private String trackName;
+    private UUID userId;
 }

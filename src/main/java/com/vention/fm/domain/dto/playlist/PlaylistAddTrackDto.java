@@ -12,7 +12,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PlaylistAddTrackDto {
-    private UUID playlistId;
-    private UUID trackId;
-    private UUID ownerId;
+    private String playlistName;
+    private String trackName;
+    private UUID userId;
 }

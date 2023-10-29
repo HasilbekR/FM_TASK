@@ -2,6 +2,7 @@ package com.vention.fm.servlets.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vention.fm.domain.dto.user.UserRequestDto;
+import com.vention.fm.exception.BadRequestException;
 import com.vention.fm.service.UserService;
 import com.vention.fm.utils.Utils;
 import jakarta.servlet.annotation.WebServlet;
@@ -17,9 +18,13 @@ public class RegisterServlet extends HttpServlet {
     private final ObjectMapper objectMapper = Utils.getObjectMapper();
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        UserRequestDto userRequestDto = objectMapper.readValue(req.getReader(), UserRequestDto.class);
-        userService.signUp(userRequestDto);
-        resp.getWriter().print("Successfully signed up");
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
+        try {
+            UserRequestDto userRequestDto = objectMapper.readValue(req.getReader(), UserRequestDto.class);
+            userService.signUp(userRequestDto);
+            resp.getWriter().print("Successfully signed up");
+        } catch (IOException e) {
+            throw new BadRequestException(e.getMessage());
+        }
     }
 }

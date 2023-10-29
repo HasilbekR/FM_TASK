@@ -12,6 +12,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PlaylistRemoveTrackDto {
-    private UUID trackInPlaylistId;
-    private UUID ownerId;
+    private String playlistName;
+    private String trackName;
+    private UUID userId;
 }

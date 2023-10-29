@@ -8,14 +8,26 @@ import java.util.UUID;
 
 public class PlaylistRatingService {
     private final PlaylistRatingRepository playlistRatingRepository = new PlaylistRatingRepositoryImpl();
+    private final UserService userService = new UserService();
 
     /**
-     * Saving method works when used has not rated the playlist yet
-     *
-     * @param playlistRating -
+     * Saving method works when user has not rated the playlist yet
      */
     public void save(PlaylistRating playlistRating) {
         playlistRatingRepository.save(playlistRating);
+    }
+
+    public PlaylistRating get(UUID playlistId, UUID userId) {
+        userService.doesUserExist(userId);
+        return playlistRatingRepository.get(playlistId, userId);
+    }
+
+    public int getLikeCount(UUID playlistId) {
+        return playlistRatingRepository.getLikeCount(playlistId);
+    }
+
+    public int getDislikeCount(UUID playlistId) {
+        return playlistRatingRepository.getDislikeCount(playlistId);
     }
 
     /**
@@ -38,17 +50,5 @@ public class PlaylistRatingService {
      */
     public void delete(UUID playlistId, UUID userId) {
         playlistRatingRepository.delete(playlistId, userId);
-    }
-
-    public PlaylistRating get(UUID playlistId, UUID userId) {
-        return playlistRatingRepository.get(playlistId, userId);
-    }
-
-    public Integer getLikeCount(UUID playlistId) {
-        return playlistRatingRepository.getLikeCount(playlistId);
-    }
-
-    public Integer getDislikeCount(UUID playlistId) {
-        return playlistRatingRepository.getDislikeCount(playlistId);
     }
 }

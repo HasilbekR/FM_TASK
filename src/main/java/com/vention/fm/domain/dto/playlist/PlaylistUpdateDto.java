@@ -12,8 +12,8 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PlaylistUpdateDto {
-    private UUID id;
     private String name;
+    private String updatedName;
     private Boolean isPublic;
-    private UUID ownerId;
+    private UUID userId;
 }
