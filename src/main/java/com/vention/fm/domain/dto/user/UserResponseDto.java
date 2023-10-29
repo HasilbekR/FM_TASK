@@ -1,15 +1,16 @@
 package com.vention.fm.domain.dto.user;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.vention.fm.domain.model.user.UserRole;
 import lombok.*;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class UserRequestDto {
+@Builder
+public class UserResponseDto {
     private String username;
     private String email;
-    private String password;
+    private Boolean isVerified;
+    private UserRole role;
 }

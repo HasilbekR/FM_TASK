@@ -10,6 +10,7 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 public class TrackDto {
+
     private String name;
     private String url;
     private Integer duration;

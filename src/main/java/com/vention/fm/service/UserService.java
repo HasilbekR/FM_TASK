@@ -1,23 +1,23 @@
 package com.vention.fm.service;
 
-import com.vention.fm.domain.dto.user.LoginDto;
-import com.vention.fm.domain.dto.user.UserDto;
+import com.vention.fm.domain.dto.user.UserResponseDto;
 import com.vention.fm.domain.dto.user.UserRequestDto;
 import com.vention.fm.domain.model.user.User;
 import com.vention.fm.domain.model.user.UserRole;
 import com.vention.fm.exception.AuthenticationFailedException;
 import com.vention.fm.exception.DataNotFoundException;
 import com.vention.fm.exception.UniqueObjectException;
+import com.vention.fm.mapper.UserMapper;
 import com.vention.fm.repository.user.UserRepository;
 import com.vention.fm.repository.user.UserRepositoryImpl;
-import com.vention.fm.utils.MapStruct;
+import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 import java.util.UUID;
 
 public class UserService {
     private final UserRepository userRepository = new UserRepositoryImpl();
-    private final MapStruct mapStruct = MapStruct.INSTANCE;
+    private final UserMapper mapper = Mappers.getMapper(UserMapper.class);
 
     public void signUp(UserRequestDto userRequestDto) {
         if (userRepository.getByUsername(userRequestDto.getUsername()) != null) {
@@ -33,11 +33,11 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public UserDto signIn(LoginDto loginDto) {
+    public UserResponseDto signIn(UserRequestDto loginDto) {
         User user = userRepository.getByUsername(loginDto.getUsername());
         if (user != null) {
             if (user.getPassword().equals(loginDto.getPassword())) {
-                return mapStruct.userToDto(user);
+                return mapper.userToDto(user);
             } else {
                 throw new AuthenticationFailedException("Wrong password");
             }
@@ -54,14 +54,14 @@ public class UserService {
         return user;
     }
 
-    public List<UserDto> getAllActiveUsers() {
+    public List<UserResponseDto> getAllActiveUsers() {
         List<User> allUsers = userRepository.getAllUsers(false);
-        return mapStruct.usersToDto(allUsers);
+        return mapper.usersToDto(allUsers);
     }
 
-    public List<UserDto> getAllBlockedUsers() {
+    public List<UserResponseDto> getAllBlockedUsers() {
         List<User> allUsers = userRepository.getAllUsers(true);
-        return mapStruct.usersToDto(allUsers);
+        return mapper.usersToDto(allUsers);
     }
 
     public void doesUserExist(UUID userId) {

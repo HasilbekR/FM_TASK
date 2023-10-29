@@ -18,17 +18,17 @@ import java.util.UUID;
 public class ExceptionSecurityControlFilter implements Filter {
     private static final UserService userService = new UserService();
     private final List<String> RESTRICTED_URLS = Arrays.asList(
-            "http://localhost:8081/artist/block",
-            "http://localhost:8081/artist/unblock",
-            "http://localhost:8081/artist/save-top-artists",
-            "http://localhost:8081/track/block",
-            "http://localhost:8081/track/unblock",
-            "http://localhost:8081/track/save-top-tracks",
-            "http://localhost:8081/track/save-top-tracks-by-artist",
-            "http://localhost:8081/user/block",
-            "http://localhost:8081/user/unblock",
-            "http://localhost:8081/user/get-all-blocked-users",
-            "http://localhost:8081/user/get-all-active-users"
+            "/artist/block",
+            "/artist/unblock",
+            "/artist/save-top-artists",
+            "/track/block",
+            "/track/unblock",
+            "/track/save-top-tracks",
+            "/track/save-top-tracks-by-artist",
+            "/user/block",
+            "/user/unblock",
+            "/user/get-all-blocked-users",
+            "/user/get-all-active-users"
     );
 
     @Override
@@ -43,7 +43,8 @@ public class ExceptionSecurityControlFilter implements Filter {
         String pathInfo = httpRequest.getRequestURL().toString();
 
         try {
-            if (RESTRICTED_URLS.contains(pathInfo)) {
+            boolean isRestricted = RESTRICTED_URLS.stream().anyMatch(pathInfo::contains);
+            if (isRestricted) {
                 verifyAdmin(UUID.fromString(httpRequest.getParameter("userId")));
             }
             chain.doFilter(request, response);

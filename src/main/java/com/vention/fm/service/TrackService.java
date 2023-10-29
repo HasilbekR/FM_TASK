@@ -3,15 +3,15 @@ package com.vention.fm.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vention.fm.domain.dto.track.TrackDto;
-import com.vention.fm.domain.dto.track.TrackSaveDto;
 import com.vention.fm.domain.model.artist.Artist;
 import com.vention.fm.domain.model.track.Track;
 import com.vention.fm.exception.BadRequestException;
 import com.vention.fm.exception.DataNotFoundException;
+import com.vention.fm.mapper.TrackMapper;
 import com.vention.fm.repository.track.TrackRepository;
 import com.vention.fm.repository.track.TrackRepositoryImpl;
-import com.vention.fm.utils.MapStruct;
 import com.vention.fm.utils.Utils;
+import org.mapstruct.factory.Mappers;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -27,16 +27,16 @@ import java.util.UUID;
 public class TrackService {
     private final TrackRepository trackRepository = new TrackRepositoryImpl();
     private final ArtistService artistService = new ArtistService();
-    private final MapStruct mapStruct = MapStruct.INSTANCE;
+    private final TrackMapper mapper = Mappers.getMapper(TrackMapper.class);
     private final ObjectMapper objectMapper = Utils.getObjectMapper();
 
-    public TrackDto createTrack(TrackSaveDto trackSaveDto) {
-        Artist artistByName = artistService.getArtistByName(trackSaveDto.getArtist());
-        Track track = mapStruct.trackDtoToTrack(trackSaveDto);
+    public TrackDto createTrack(TrackDto trackSaveDto) {
+        Artist artistByName = artistService.getArtistByName(trackSaveDto.getArtist().getName());
+        Track track = mapper.trackDtoToTrack(trackSaveDto);
         track.setArtist(artistByName);
         track.setListeners(0);
         track.setPlaycount(0);
-        return mapStruct.trackToDto(save(track));
+        return mapper.trackToDto(save(track));
     }
 
     public Track save(Track track) {
@@ -61,7 +61,7 @@ public class TrackService {
         for (Track track : trackList) {
             tracks.add(save(track));
         }
-        return mapStruct.tracksToDto(tracks);
+        return mapper.tracksToDto(tracks);
     }
 
     public String saveTopTracks(String page) {
@@ -87,7 +87,7 @@ public class TrackService {
         }
         Track track = trackRepository.getTrackByName(name);
         if (track != null) {
-            return mapStruct.trackToDto(track);
+            return mapper.trackToDto(track);
         } else {
             throw new DataNotFoundException("Track with name " + name + " not found");
         }
@@ -103,7 +103,7 @@ public class TrackService {
     }
 
     public List<TrackDto> getAll() {
-        return mapStruct.tracksToDto(trackRepository.getAll());
+        return mapper.tracksToDto(trackRepository.getAll());
     }
 
     public List<TrackDto> getTrackListByArtistName(String name) {
@@ -112,12 +112,12 @@ public class TrackService {
         }
         UUID artistId = artistService.getIdByName(name);
         List<Track> tracks = trackRepository.getTrackListByArtist(artistId);
-        return mapStruct.tracksToDto(tracks);
+        return mapper.tracksToDto(tracks);
     }
 
     public List<TrackDto> searchTracksByName(String name) {
         List<Track> tracks = trackRepository.searchTracksByName(name);
-        return mapStruct.tracksToDto(tracks);
+        return mapper.tracksToDto(tracks);
     }
 
     public void blockTrack(Boolean isBlocked, String trackName) {

@@ -3,14 +3,14 @@ package com.vention.fm.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vention.fm.domain.dto.artist.ArtistDto;
-import com.vention.fm.domain.dto.artist.ArtistSaveDto;
 import com.vention.fm.exception.BadRequestException;
 import com.vention.fm.exception.DataNotFoundException;
+import com.vention.fm.mapper.ArtistMapper;
 import com.vention.fm.repository.artist.ArtistRepository;
 import com.vention.fm.repository.artist.ArtistRepositoryImpl;
 import com.vention.fm.domain.model.artist.Artist;
-import com.vention.fm.utils.MapStruct;
 import com.vention.fm.utils.Utils;
+import org.mapstruct.factory.Mappers;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -23,7 +23,7 @@ import java.util.UUID;
 
 public class ArtistService {
     private final ArtistRepository artistRepository = new ArtistRepositoryImpl();
-    private final MapStruct mapStruct = MapStruct.INSTANCE;
+    private final ArtistMapper mapper = Mappers.getMapper(ArtistMapper.class);
     private final ObjectMapper objectMapper = Utils.getObjectMapper();
 
     /**
@@ -34,14 +34,14 @@ public class ArtistService {
      *
      * @return -artist entity
      */
-    public ArtistDto create(ArtistSaveDto artistDto) {
+    public ArtistDto create(ArtistDto artistDto) {
         Artist artist = Artist
                 .builder()
                 .name(artistDto.getName())
                 .url(artistDto.getUrl())
                 .build();
         Artist savedArtist = save(artist);
-        return mapStruct.artistToDto(savedArtist);
+        return mapper.artistToDto(savedArtist);
     }
 
     public Artist save(Artist artist) {
@@ -62,7 +62,7 @@ public class ArtistService {
 
         for (Artist artist : artistList) {
             Artist savedArtist = save(artist);
-            ArtistDto artistDto = mapStruct.artistToDto(savedArtist);
+            ArtistDto artistDto = mapper.artistToDto(savedArtist);
             savedArtists.add(artistDto);
         }
         return savedArtists;
@@ -93,16 +93,12 @@ public class ArtistService {
             throw new BadRequestException(e.getMessage());
         }
     }
-
+    //for external use
     public ArtistDto getArtistDto(String name) {
-        Artist artistByName = artistRepository.getArtistByName(name);
-        if (artistByName != null) {
-            return mapStruct.artistToDto(artistByName);
-        } else {
-            throw new DataNotFoundException("Artist by name " + name + " not found");
-        }
+        Artist artistByName = getArtistByName(name);
+        return mapper.artistToDto(artistByName);
     }
-
+    //for internal use
     public Artist getArtistByName(String name) {
         Artist artistByName = artistRepository.getArtistByName(name);
         if (artistByName != null) {
@@ -123,7 +119,7 @@ public class ArtistService {
 
     public List<ArtistDto> getAll() {
         List<Artist> artists = artistRepository.getAll();
-        return mapStruct.artistsToDto(artists);
+        return mapper.artistsToDto(artists);
     }
 
     public UUID getIdByName(String name) {
