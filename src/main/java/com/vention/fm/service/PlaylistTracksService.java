@@ -1,17 +1,18 @@
 package com.vention.fm.service;
 
-import com.vention.fm.domain.dto.playlist.PlaylistAddTrackDto;
-import com.vention.fm.domain.dto.playlist.PlaylistDto;
-import com.vention.fm.domain.dto.playlist.PlaylistRemoveTrackDto;
+import com.vention.fm.domain.dto.playlist.PlaylistRequestDto;
+import com.vention.fm.domain.dto.playlist.PlaylistResponseDto;
 import com.vention.fm.domain.dto.track.TrackDto;
 import com.vention.fm.domain.model.playlist.Playlist;
 import com.vention.fm.domain.model.playlist.PlaylistTracks;
 import com.vention.fm.domain.model.track.Track;
 import com.vention.fm.exception.AccessRestrictedException;
 import com.vention.fm.exception.AuthenticationFailedException;
+import com.vention.fm.mapper.PlaylistMapper;
+import com.vention.fm.mapper.TrackMapper;
 import com.vention.fm.repository.playlist_tracks.PlaylistTracksRepository;
 import com.vention.fm.repository.playlist_tracks.PlaylistTracksRepositoryImpl;
-import com.vention.fm.utils.MapStruct;
+import org.mapstruct.factory.Mappers;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -21,16 +22,17 @@ public class PlaylistTracksService {
     private final PlaylistTracksRepository playlistTracksRepository = new PlaylistTracksRepositoryImpl();
     private final PlaylistService playlistService = new PlaylistService();
     private final TrackService trackService = new TrackService();
-    private final MapStruct mapStruct = MapStruct.INSTANCE;
+    private final PlaylistMapper playlistMapper = Mappers.getMapper(PlaylistMapper.class);
+    private final TrackMapper trackMapper = Mappers.getMapper(TrackMapper.class);
 
-    public String addPlaylist(PlaylistAddTrackDto trackDto) throws AccessRestrictedException {
+    public String addPlaylist(PlaylistRequestDto trackDto) throws AccessRestrictedException {
         Track trackState = trackService.getTrackState(trackDto.getTrackName());
 
         if (trackState.getIsBlocked()) {
             throw new AccessRestrictedException("Blocked tracks cannot be added into playlist");
         }
 
-        Playlist playlistState = playlistService.getPlaylistState(trackDto.getPlaylistName());
+        Playlist playlistState = playlistService.getPlaylistState(trackDto.getName());
         if (playlistState != null) {
             if (playlistState.getOwner().getId().equals(trackDto.getUserId())) {
                 int position = playlistTracksRepository.countPlaylistTracks(playlistState.getId()) + 1;
@@ -40,29 +42,29 @@ public class PlaylistTracksService {
                 throw new AuthenticationFailedException("Access denied to the playlist");
             }
         }
-        return trackDto.getTrackName() + " successfully added to playlist " + trackDto.getPlaylistName();
+        return trackDto.getTrackName() + " successfully added to playlist " + trackDto.getName();
     }
 
-    public PlaylistDto getPlaylist(String playlistName, UUID ownerId) {
+    public PlaylistResponseDto getPlaylist(String playlistName, UUID ownerId) {
         Playlist playlist = playlistService.getByName(playlistName, ownerId);
         List<PlaylistTracks> playlistTracks = playlistTracksRepository.getPlaylistTracks(playlist.getId());
         List<TrackDto> tracks = new LinkedList<>();
         if(!playlistTracks.isEmpty()) {
             for (PlaylistTracks playlistTrack : playlistTracks) {
                 Track track = playlistTrack.getTrack();
-                TrackDto trackDto = mapStruct.trackToDto(track);
+                TrackDto trackDto = trackMapper.trackToDto(track);
                 trackDto.setPosition(playlistTrack.getTrackPosition());
 
                 tracks.add(trackDto);
             }
         }
-        PlaylistDto playlistDto = mapStruct.playlistToDto(playlist);
-        playlistDto.setTracks(tracks);
-        return playlistDto;
+        PlaylistResponseDto playlistResponseDto = playlistMapper.playlistToDto(playlist);
+        playlistResponseDto.setTracks(tracks);
+        return playlistResponseDto;
     }
 
-    public String removeTrack(PlaylistRemoveTrackDto playlistTrackDto) {
-        Playlist playlistState = playlistService.getPlaylistState(playlistTrackDto.getPlaylistName());
+    public String removeTrack(PlaylistRequestDto playlistTrackDto) {
+        Playlist playlistState = playlistService.getPlaylistState(playlistTrackDto.getName());
         Track trackState = trackService.getTrackState(playlistTrackDto.getTrackName());
 
         if (playlistState.getOwner().getId().equals(playlistTrackDto.getUserId())) {
@@ -76,6 +78,6 @@ public class PlaylistTracksService {
         } else {
             throw new AuthenticationFailedException("Access denied to the playlist");
         }
-        return playlistTrackDto.getTrackName() + " removed from playlist " + playlistTrackDto.getPlaylistName();
+        return playlistTrackDto.getTrackName() + " removed from playlist " + playlistTrackDto.getName();
     }
 }

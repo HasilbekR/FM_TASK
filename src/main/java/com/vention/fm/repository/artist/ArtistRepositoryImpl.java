@@ -4,7 +4,7 @@ import com.vention.fm.domain.model.artist.Artist;
 import com.vention.fm.exception.BadRequestException;
 import com.vention.fm.utils.DatabaseUtils;
 import com.vention.fm.utils.Utils;
-import com.vention.fm.utils.ResultSetMapper;
+import com.vention.fm.mapper.ResultSetMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,23 +37,6 @@ public class ArtistRepositoryImpl implements ArtistRepository {
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             log.error("Error occurred while saving artist", e);
-            throw new BadRequestException(e.getMessage());
-        }
-    }
-
-    @Override
-    public Artist getArtistById(UUID id) {
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement(GET_BY_ID);
-            preparedStatement.setObject(1, id);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                return ResultSetMapper.mapArtist(resultSet);
-            } else {
-                return null;
-            }
-        } catch (SQLException e) {
-            log.error("Error occurred while retrieving artist", e);
             throw new BadRequestException(e.getMessage());
         }
     }
@@ -95,7 +78,7 @@ public class ArtistRepositoryImpl implements ArtistRepository {
     @Override
     public List<Artist> getAll() {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(GET_ALL);
+            PreparedStatement preparedStatement = connection.prepareStatement(GET_QUERY);
             ResultSet resultSet = preparedStatement.executeQuery();
             List<Artist> artists = new ArrayList<>();
             while (resultSet.next()) {

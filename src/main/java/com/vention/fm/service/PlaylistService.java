@@ -6,9 +6,10 @@ import com.vention.fm.domain.model.playlist.PlaylistRating;
 import com.vention.fm.domain.model.user.User;
 import com.vention.fm.exception.AccessRestrictedException;
 import com.vention.fm.exception.DataNotFoundException;
+import com.vention.fm.mapper.PlaylistMapper;
 import com.vention.fm.repository.playlist.PlaylistRepository;
 import com.vention.fm.repository.playlist.PlaylistRepositoryImpl;
-import com.vention.fm.utils.MapStruct;
+import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 import java.util.UUID;
@@ -17,9 +18,9 @@ public class PlaylistService {
     private final PlaylistRepository playlistRepository = new PlaylistRepositoryImpl();
     private final UserService userService = new UserService();
     private final PlaylistRatingService playlistRatingService = new PlaylistRatingService();
-    private final MapStruct mapStruct = MapStruct.INSTANCE;
+    private final PlaylistMapper mapper = Mappers.getMapper(PlaylistMapper.class);
 
-    public String save(PlaylistCreateDto playlistDto) throws AccessRestrictedException {
+    public String save(PlaylistRequestDto playlistDto) throws AccessRestrictedException {
         User user = userService.getUserState(playlistDto.getUserId());
         if (user.getIsBlocked()) {
             throw new AccessRestrictedException("Blocked users are not allowed to create a new playlist");
@@ -57,14 +58,14 @@ public class PlaylistService {
         }
     }
 
-    public List<PlaylistDto> getAvailablePlaylists() {
+    public List<PlaylistResponseDto> getAvailablePlaylists() {
         List<Playlist> availablePlaylists = playlistRepository.getAvailablePlaylists();
-        return mapStruct.playlistsToDto(availablePlaylists);
+        return mapper.playlistsToDto(availablePlaylists);
     }
 
-    public List<PlaylistDto> getAllByOwnerId(UUID ownerId) {
+    public List<PlaylistResponseDto> getAllByOwnerId(UUID ownerId) {
         List<Playlist> playlists = playlistRepository.getAllByOwnerId(ownerId);
-        return mapStruct.playlistsToDto(playlists);
+        return mapper.playlistsToDto(playlists);
     }
 
     /**
@@ -78,22 +79,22 @@ public class PlaylistService {
         playlistRepository.rate(likeCount, dislikeCount, playlistId);
     }
 
-    public String update(PlaylistUpdateDto playlistDto) throws AccessRestrictedException {
-        Playlist playlist = playlistRepository.getPlaylistByName(playlistDto.getName());
+    public String update(PlaylistRequestDto playlistResponseDto) throws AccessRestrictedException {
+        Playlist playlist = playlistRepository.getPlaylistByName(playlistResponseDto.getName());
         if (playlist != null) {
-            if (!playlist.getOwner().getId().equals(playlistDto.getUserId())) {
+            if (!playlist.getOwner().getId().equals(playlistResponseDto.getUserId())) {
                 throw new AccessRestrictedException("You do not have access to update this playlist");
             }
-            if(playlistDto.getIsPublic() != null){
-                playlist.setIsPublic(playlistDto.getIsPublic());
+            if(playlistResponseDto.getIsPublic() != null){
+                playlist.setIsPublic(playlistResponseDto.getIsPublic());
             }
-            if(playlistDto.getUpdatedName() != null){
-                playlist.setName(playlistDto.getUpdatedName());
+            if(playlistResponseDto.getUpdatedName() != null){
+                playlist.setName(playlistResponseDto.getUpdatedName());
             }
             playlistRepository.update(playlist);
             return "Playlist successfully updated";
         } else {
-            throw new DataNotFoundException("Playlist with name " + playlistDto.getName() + " not found");
+            throw new DataNotFoundException("Playlist with name " + playlistResponseDto.getName() + " not found");
         }
     }
 
@@ -111,8 +112,8 @@ public class PlaylistService {
         }
     }
 
-    public String ratePlaylist(PlaylistRatingDto playlistRatingDto) {
-        Playlist playlist = getPlaylistState(playlistRatingDto.getPlaylistName());
+    public String ratePlaylist(PlaylistRequestDto playlistRatingDto) {
+        Playlist playlist = getPlaylistState(playlistRatingDto.getName());
         PlaylistRating rating = playlistRatingService.get(playlist.getId(), playlistRatingDto.getUserId());
         // checks if the playlist available to rate
         if (playlist.getOwner().getId().equals(playlistRatingDto.getUserId()) || playlist.getIsPublic()) {
@@ -143,7 +144,7 @@ public class PlaylistService {
                 return "Rating saved successfully";
             }
         } else {
-            throw new DataNotFoundException("Playlist with name " + playlistRatingDto.getPlaylistName() + " not found");
+            throw new DataNotFoundException("Playlist with name " + playlistRatingDto.getName() + " not found");
         }
     }
 }

@@ -4,7 +4,7 @@ import com.vention.fm.domain.model.album.Album;
 import com.vention.fm.exception.BadRequestException;
 import com.vention.fm.utils.DatabaseUtils;
 import com.vention.fm.utils.Utils;
-import com.vention.fm.utils.ResultSetMapper;
+import com.vention.fm.mapper.ResultSetMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,7 +74,7 @@ public class AlbumRepositoryImpl implements AlbumRepository {
     @Override
     public Album getAlbum(String albumName, UUID ownerId) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(GET_ALBUM);
+            PreparedStatement preparedStatement = connection.prepareStatement(GET_ALBUM_WITH_OWNER_ID);
             preparedStatement.setString(1, albumName);
             preparedStatement.setObject(2, ownerId);
             ResultSet resultSet = preparedStatement.executeQuery();
