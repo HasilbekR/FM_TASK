@@ -94,7 +94,7 @@ public class TrackRepositoryImpl implements TrackRepository {
     @Override
     public Track getTrackByNameAndArtist(String name, UUID artistId) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(GET_TRACK);
+            PreparedStatement preparedStatement = connection.prepareStatement(GET_TRACK_WITH_ARTIST);
             preparedStatement.setString(1, name);
             preparedStatement.setObject(2, artistId);
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -129,7 +129,7 @@ public class TrackRepositoryImpl implements TrackRepository {
     @Override
     public List<Track> getAll() {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(GET_ALL);
+            PreparedStatement preparedStatement = connection.prepareStatement(GET_QUERY);
             ResultSet resultSet = preparedStatement.executeQuery();
             ArrayList<Track> tracks = new ArrayList<>();
             while (resultSet.next()) {

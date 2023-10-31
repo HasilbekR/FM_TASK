@@ -1,6 +1,5 @@
 package com.vention.fm.mapper;
 
-import com.vention.fm.domain.model.BaseModel;
 import com.vention.fm.domain.model.album.Album;
 import com.vention.fm.domain.model.album.AlbumTracks;
 import com.vention.fm.domain.model.artist.Artist;
@@ -10,31 +9,14 @@ import com.vention.fm.domain.model.playlist.PlaylistTracks;
 import com.vention.fm.domain.model.track.Track;
 import com.vention.fm.domain.model.user.User;
 import com.vention.fm.domain.model.user.UserRole;
-import com.vention.fm.repository.album.AlbumRepository;
-import com.vention.fm.repository.album.AlbumRepositoryImpl;
-import com.vention.fm.repository.artist.ArtistRepository;
-import com.vention.fm.repository.artist.ArtistRepositoryImpl;
-import com.vention.fm.repository.playlist.PlaylistRepository;
-import com.vention.fm.repository.playlist.PlaylistRepositoryImpl;
-import com.vention.fm.repository.track.TrackRepository;
-import com.vention.fm.repository.track.TrackRepositoryImpl;
-import com.vention.fm.repository.user.UserRepository;
-import com.vention.fm.repository.user.UserRepositoryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.UUID;
 
 public class ResultSetMapper {
-    private final static ArtistRepository artistRepository = new ArtistRepositoryImpl();
-    private final static UserRepository userRepository = new UserRepositoryImpl();
-    private final static PlaylistRepository playlistRepository = new PlaylistRepositoryImpl();
-    private final static AlbumRepository albumRepository = new AlbumRepositoryImpl();
-    private final static TrackRepository trackRepository = new TrackRepositoryImpl();
-
     private static final Logger log = LoggerFactory.getLogger(ResultSetMapper.class);
 
     public static User mapUser(ResultSet resultSet) {
@@ -42,10 +24,10 @@ public class ResultSetMapper {
             User user = new User()
                     .setUsername(resultSet.getString("username"))
                     .setEmail(resultSet.getString("email"))
-                    .setIsVerified(resultSet.getBoolean("is_verified"))
                     .setPassword(resultSet.getString("password"));
             user.setRole(UserRole.valueOf(resultSet.getString("role")));
-            map(resultSet, user);
+            user.setId(UUID.fromString(resultSet.getString("user_id")));
+            user.setIsBlocked(resultSet.getBoolean("user_is_blocked"));
             return user;
         } catch (SQLException e) {
             log.error("Error occurred while mapping user", e);
@@ -56,14 +38,15 @@ public class ResultSetMapper {
     public static Track mapTrack(ResultSet resultSet) {
         try {
             Track track = Track.builder()
-                    .name(resultSet.getString("name"))
+                    .name(resultSet.getString("track_name"))
                     .duration(resultSet.getInt("duration"))
-                    .url(resultSet.getString("url"))
-                    .playcount(resultSet.getInt("playcount"))
-                    .listeners(resultSet.getInt("listeners"))
-                    .artist(artistRepository.getArtistById(UUID.fromString(resultSet.getString("artist_id"))))
+                    .url(resultSet.getString("track_url"))
+                    .playcount(resultSet.getInt("track_playcount"))
+                    .listeners(resultSet.getInt("track_listeners"))
+                    .artist(mapArtist(resultSet))
                     .build();
-            map(resultSet, track);
+            track.setId(UUID.fromString(resultSet.getString("track_id")));
+            track.setIsBlocked(resultSet.getBoolean("track_is_blocked"));
             return track;
         } catch (SQLException e) {
             log.error("Error occurred while mapping track", e);
@@ -92,12 +75,13 @@ public class ResultSetMapper {
     public static Artist mapArtist(ResultSet resultSet) {
         try {
             Artist artist = Artist.builder()
-                    .name(resultSet.getString("name"))
-                    .url(resultSet.getString("url"))
-                    .playcount(resultSet.getInt("playcount"))
-                    .listeners(resultSet.getInt("listeners"))
+                    .name(resultSet.getString("artist_name"))
+                    .url(resultSet.getString("artist_url"))
+                    .playcount(resultSet.getInt("artist_playcount"))
+                    .listeners(resultSet.getInt("artist_listeners"))
                     .build();
-            map(resultSet, artist);
+            artist.setId(UUID.fromString(resultSet.getString("artist_id")));
+            artist.setIsBlocked(resultSet.getBoolean("artist_is_blocked"));
             return artist;
         } catch (SQLException e) {
             log.error("Error occurred while mapping artist", e);
@@ -120,11 +104,11 @@ public class ResultSetMapper {
     public static Album mapAlbum(ResultSet resultSet) {
         try {
             Album album = Album.builder()
-                    .name(resultSet.getString("name"))
-                    .artist(artistRepository.getArtistById(UUID.fromString(resultSet.getString("artist_id"))))
-                    .owner(userRepository.getById((UUID) resultSet.getObject("owner_id")))
+                    .name(resultSet.getString("album_name"))
+                    .artist(mapArtist(resultSet))
+                    .owner(mapUser(resultSet))
                     .build();
-            map(resultSet, album);
+            album.setId(UUID.fromString(resultSet.getString("album_id")));
             return album;
         } catch (SQLException e) {
             log.error("Error occurred while mapping album", e);
@@ -149,11 +133,10 @@ public class ResultSetMapper {
     public static AlbumTracks mapAlbumTracks(ResultSet resultSet) {
         try {
             AlbumTracks albumTracks = AlbumTracks.builder()
-                    .album(albumRepository.getById((UUID) resultSet.getObject("album_id")))
-                    .track(trackRepository.getById((UUID) resultSet.getObject("track_id")))
+                    .track(mapTrack(resultSet))
                     .trackPosition(resultSet.getInt("track_position"))
                     .build();
-            map(resultSet, albumTracks);
+            albumTracks.setId(UUID.fromString(resultSet.getString("album_track_id")));
             return albumTracks;
         } catch (SQLException e) {
             log.error("Error occurred while mapping album tracks", e);
@@ -164,13 +147,13 @@ public class ResultSetMapper {
     public static Playlist mapPlaylist(ResultSet resultSet) {
         try {
             Playlist playlist = Playlist.builder()
-                    .name(resultSet.getString("name"))
+                    .name(resultSet.getString("playlist_name"))
                     .isPublic(resultSet.getBoolean("is_public"))
                     .likeCount(resultSet.getInt("like_count"))
                     .dislikeCount(resultSet.getInt("dislike_count"))
-                    .owner(userRepository.getById((UUID) resultSet.getObject("owner_id")))
+                    .owner(mapUser(resultSet))
                     .build();
-            map(resultSet, playlist);
+            playlist.setId(UUID.fromString(resultSet.getString("playlist_id")));
             return playlist;
         } catch (SQLException e) {
             log.error("Error occurred while mapping playlist", e);
@@ -196,11 +179,10 @@ public class ResultSetMapper {
     public static PlaylistTracks mapPlaylistTracks(ResultSet resultSet) {
         try {
             PlaylistTracks playlistTracks = PlaylistTracks.builder()
-                    .playlist(playlistRepository.getById((UUID) resultSet.getObject("playlist_id")))
-                    .track(trackRepository.getById((UUID) resultSet.getObject("track_id")))
+                    .track(mapTrack(resultSet))
                     .trackPosition(resultSet.getInt("track_position"))
                     .build();
-            map(resultSet, playlistTracks);
+            playlistTracks.setId(UUID.fromString(resultSet.getString("playlist_track_id")));
             return playlistTracks;
         } catch (SQLException e) {
             log.error("Error occurred while mapping playlist tracks", e);
@@ -211,28 +193,13 @@ public class ResultSetMapper {
     public static PlaylistRating mapPlaylistRating(ResultSet resultSet) {
         try {
             PlaylistRating rating = PlaylistRating.builder()
-                    .user(userRepository.getById((UUID) resultSet.getObject("user_id")))
-                    .playlist(playlistRepository.getById((UUID) resultSet.getObject("playlist_id")))
                     .isLiked(resultSet.getBoolean("is_liked"))
                     .build();
-            map(resultSet, rating);
+            rating.setId(UUID.fromString(resultSet.getString("playlist_rating_id")));
             return rating;
         } catch (SQLException e) {
             log.error("Error occurred while mapping playlist rating", e);
         }
         return null;
-    }
-
-    private static void map(ResultSet resultSet, BaseModel baseModel) {
-        try {
-            Timestamp createdDate = resultSet.getTimestamp("created_date");
-            baseModel.setCreatedDate(createdDate.toLocalDateTime());
-            Timestamp updatedDate = resultSet.getTimestamp("updated_date");
-            baseModel.setUpdatedDate(updatedDate.toLocalDateTime());
-            baseModel.setIsBlocked(resultSet.getBoolean("is_blocked"));
-            baseModel.setId(UUID.fromString(resultSet.getString("id")));
-        } catch (SQLException e) {
-            log.error("Error occurred while mapping", e);
-        }
     }
 }

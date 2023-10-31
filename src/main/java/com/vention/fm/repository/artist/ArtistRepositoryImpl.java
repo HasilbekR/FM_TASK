@@ -42,23 +42,6 @@ public class ArtistRepositoryImpl implements ArtistRepository {
     }
 
     @Override
-    public Artist getArtistById(UUID id) {
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement(GET_BY_ID);
-            preparedStatement.setObject(1, id);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                return ResultSetMapper.mapArtist(resultSet);
-            } else {
-                return null;
-            }
-        } catch (SQLException e) {
-            log.error("Error occurred while retrieving artist", e);
-            throw new BadRequestException(e.getMessage());
-        }
-    }
-
-    @Override
     public Artist getArtistByName(String name) {
         try {
             PreparedStatement statement = connection.prepareStatement(GET_BY_NAME);
@@ -95,7 +78,7 @@ public class ArtistRepositoryImpl implements ArtistRepository {
     @Override
     public List<Artist> getAll() {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(GET_ALL);
+            PreparedStatement preparedStatement = connection.prepareStatement(GET_QUERY);
             ResultSet resultSet = preparedStatement.executeQuery();
             List<Artist> artists = new ArrayList<>();
             while (resultSet.next()) {

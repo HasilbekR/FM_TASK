@@ -74,7 +74,7 @@ public class AlbumRepositoryImpl implements AlbumRepository {
     @Override
     public Album getAlbum(String albumName, UUID ownerId) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(GET_ALBUM);
+            PreparedStatement preparedStatement = connection.prepareStatement(GET_ALBUM_WITH_OWNER_ID);
             preparedStatement.setString(1, albumName);
             preparedStatement.setObject(2, ownerId);
             ResultSet resultSet = preparedStatement.executeQuery();
