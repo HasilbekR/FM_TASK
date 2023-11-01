@@ -6,11 +6,12 @@ import java.util.List;
 import java.util.UUID;
 
 public interface PlaylistTracksRepository {
-    String GET_QUERY = "select pt.id as playlist_track_id, pt.track_position, " +
-            "t.id as track_id, t.name as track_name, t.url as track_url, t.duration, t.playcount as track_playcount, t.listeners as track_listeners, t.is_blocked as track_is_blocked, " +
-            "a.id as artist_id, a.name as artist_name, a.url as artist_url, a.playcount as artist_playcount, a.listeners as artist_listeners, a.is_blocked as artist_is_blocked " +
-            "from playlist_tracks pt inner join tracks t on pt.track_id = t.id " +
-            "inner join artists a on t.artist_id = a.id ";
+    String GET_QUERY = """
+            select pt.id as playlist_track_id, pt.track_position,
+            t.id as track_id, t.name as track_name, t.url as track_url, t.duration, t.playcount as track_playcount, t.listeners as track_listeners, t.is_blocked as track_is_blocked,
+            a.id as artist_id, a.name as artist_name, a.url as artist_url, a.playcount as artist_playcount, a.listeners as artist_listeners, a.is_blocked as artist_is_blocked
+            from playlist_tracks pt inner join tracks t on pt.track_id = t.id
+            inner join artists a on t.artist_id = a.id""";
 
     String INSERT = "insert into playlist_tracks(id, created_date, updated_date, is_blocked, playlist_id, track_id, track_position) values(?, ?, ?, ?, ?, ?, ?)";
     String GET_BY_ID = GET_QUERY + "where pt.id = ?";

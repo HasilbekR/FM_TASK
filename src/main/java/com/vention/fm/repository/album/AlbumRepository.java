@@ -6,11 +6,13 @@ import java.util.List;
 import java.util.UUID;
 
 public interface AlbumRepository {
-    String GET_QUERY = "select al.id as album_id, al.name as album_name, " +
-            "a.id as artist_id, a.name as artist_name, a.url as artist_url, a.playcount as artist_playcount, a.listeners as artist_listeners, a.is_blocked as artist_is_blocked, " +
-            "u.id as user_id, u.username, u.email, u.role, u.password, u.is_blocked as user_is_blocked " +
-            "from albums al inner join artists a on al.artist_id = a.id " +
-            "inner join users u on al.owner_id = u.id ";
+    String GET_QUERY = """
+            select al.id as album_id, al.name as album_name,
+            a.id as artist_id, a.name as artist_name, a.url as artist_url, a.playcount as artist_playcount, a.listeners as artist_listeners, a.is_blocked as artist_is_blocked,
+            u.id as user_id, u.username, u.email, u.role, u.password, u.is_blocked as user_is_blocked
+            from albums al inner join artists a on al.artist_id = a.id
+            inner join users u on al.owner_id = u.id
+            """;
 
     String INSERT = "insert into albums (id, created_date, updated_date, is_blocked, name, artist_id, owner_id) values(?, ?, ?, ?, ?, ?, ?)";
     String GET_BY_ID = GET_QUERY + "where al.id = ?";

@@ -6,9 +6,10 @@ import java.util.List;
 import java.util.UUID;
 
 public interface PlaylistRepository {
-    String GET_QUERY = "select p.id as playlist_id, p.name as playlist_name, p.is_public, p.like_count, p.dislike_count, " +
-            "u.id as user_id, u.username, u.email, u.role, u.password, u.is_blocked as user_is_blocked " +
-            "from playlists p inner join users u on p.owner_id = u.id ";
+    String GET_QUERY = """
+            select p.id as playlist_id, p.name as playlist_name, p.is_public, p.like_count, p.dislike_count,
+            u.id as user_id, u.username, u.email, u.role, u.password, u.is_blocked as user_is_blocked
+            from playlists p inner join users u on p.owner_id = u.id""";
 
     String INSERT = "insert into playlists (id, created_date, updated_date, is_blocked, name, is_public, like_count, dislike_count, owner_id) values(?, ?, ?, ?, ?, ?, ?, ?, ?)";
     String GET_BY_ID = GET_QUERY + "where p.id = ?";

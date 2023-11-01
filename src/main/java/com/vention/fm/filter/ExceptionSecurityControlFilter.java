@@ -37,7 +37,7 @@ public class ExceptionSecurityControlFilter implements Filter {
     }
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException{
         HttpServletResponse httpResponse = (HttpServletResponse) response;
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         String pathInfo = httpRequest.getRequestURL().toString();
@@ -56,7 +56,7 @@ public class ExceptionSecurityControlFilter implements Filter {
             jsonResponse.put("error message", e.getMessage());
 
             response.getWriter().write(jsonResponse.toString());
-        } catch (UniqueObjectException | BadRequestException e) {
+        } catch (UniqueObjectException | BadRequestException | ServletException e) {
             httpResponse.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             httpResponse.setContentType("application/json");
 
