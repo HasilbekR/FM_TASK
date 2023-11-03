@@ -12,11 +12,11 @@ public interface PlaylistRepository {
             from playlists p inner join users u on p.owner_id = u.id""";
 
     String INSERT = "insert into playlists (id, created_date, updated_date, is_blocked, name, is_public, like_count, dislike_count, owner_id) values(?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    String GET_BY_ID = GET_QUERY + "where p.id = ?";
-    String GET_BY_NAME = GET_QUERY + "where p.name = ?";
+    String GET_BY_ID = GET_QUERY + " where p.id = ?";
+    String GET_BY_NAME = GET_QUERY + " where p.name = ?";
     String GET_PLAYLIST_STATE = "select id, owner_id, is_public from playlists where name = ?";
-    String GET_ALL_BY_OWNER_ID = GET_QUERY + "where p.owner_id = ?";
-    String GET_AVAILABLE_PLAYLISTS = GET_QUERY + "where p.is_public = true";
+    String GET_ALL_BY_OWNER_ID = GET_QUERY + " where p.owner_id = ?";
+    String GET_AVAILABLE_PLAYLISTS = GET_QUERY + " where p.is_public = true";
     String UPDATE = "update playlists set updated_date = ?, name = ?, is_public = ? where owner_id = ? and id = ?;";
     String RATE = "update playlists set updated_date = ?, like_count = ?, dislike_count = ? where id = ?";
     String DELETE = "delete from playlists where id = ?";

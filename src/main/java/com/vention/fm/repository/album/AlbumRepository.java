@@ -15,10 +15,10 @@ public interface AlbumRepository {
             """;
 
     String INSERT = "insert into albums (id, created_date, updated_date, is_blocked, name, artist_id, owner_id) values(?, ?, ?, ?, ?, ?, ?)";
-    String GET_BY_ID = GET_QUERY + "where al.id = ?";
+    String GET_BY_ID = GET_QUERY + " where al.id = ?";
     String GET_ALBUM_STATE = "select id, artist_id from albums where name = ? and owner_id = ?";
-    String GET_ALBUM_WITH_OWNER_ID = GET_QUERY + "where al.name = ? and al.owner_id = ?";
-    String GET_ALL = GET_QUERY + "where al.owner_id = ?";
+    String GET_ALBUM_WITH_OWNER_ID = GET_QUERY + " where al.name = ? and al.owner_id = ?";
+    String GET_ALL = GET_QUERY + " where al.owner_id = ?";
     String UPDATE = "update albums set updated_date = ?, name = ? where id = ? ";
     String DELETE = "delete from albums where id = ?";
 

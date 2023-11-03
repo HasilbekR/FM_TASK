@@ -14,9 +14,9 @@ public interface PlaylistTracksRepository {
             inner join artists a on t.artist_id = a.id""";
 
     String INSERT = "insert into playlist_tracks(id, created_date, updated_date, is_blocked, playlist_id, track_id, track_position) values(?, ?, ?, ?, ?, ?, ?)";
-    String GET_BY_ID = GET_QUERY + "where pt.id = ?";
-    String GET_PLAYLIST_TRACKS = GET_QUERY + "where pt.playlist_id = ? order by pt.track_position asc";
-    String GET_TRACKS_FOR_REORDER = GET_QUERY + "where pt.track_position > (select track_position from playlist_tracks where playlist_id = ? and track_id = ?) and pt.playlist_id = ? order by pt.track_position asc";
+    String GET_BY_ID = GET_QUERY + " where pt.id = ?";
+    String GET_PLAYLIST_TRACKS = GET_QUERY + " where pt.playlist_id = ? order by pt.track_position asc";
+    String GET_TRACKS_FOR_REORDER = GET_QUERY + " where pt.track_position > (select track_position from playlist_tracks where playlist_id = ? and track_id = ?) and pt.playlist_id = ? order by pt.track_position asc";
     String COUNT_PLAYLIST_TRACKS = "select count(*) from playlist_tracks where playlist_id = ?";
     String UPDATE_POSITION = "update playlist_tracks set updated_date = ?, track_position = ? where id = ?";
     String REMOVE_TRACK = "delete from playlist_tracks where playlist_id = ? and track_id = ?";

@@ -4,14 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.vention.fm.exception.BadRequestException;
-import com.vention.fm.exception.DataNotFoundException;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Objects;
 import java.util.Properties;
 
 public class Utils {
@@ -46,15 +44,14 @@ public class Utils {
         }
         return objectMapper;
     }
-    public static String url(String request) {
+    public static String getLoaderURL() {
         try {
             Properties properties = new Properties();
             InputStream inputStream = Utils.class.getClassLoader().getResourceAsStream("loader.properties");
             properties.load(inputStream);
-            if (Objects.equals(request, "/url")) return properties.getProperty("LOADER_URL");
+            return properties.getProperty("LOADER_URL");
         } catch (IOException e) {
             throw new BadRequestException(e.getMessage());
         }
-        throw new DataNotFoundException("Invalid request");
     }
 }

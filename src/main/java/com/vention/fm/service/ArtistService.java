@@ -73,7 +73,7 @@ public class ArtistService {
             if (page == null) {
                 page = "1";
             }
-            String apiUrl = Utils.url("/url") + "/artist/save-top-artists?page=" + page;
+            String apiUrl = Utils.getLoaderURL() + "/artist/save-top-artists?page=" + page;
             URL url = new URL(apiUrl);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
