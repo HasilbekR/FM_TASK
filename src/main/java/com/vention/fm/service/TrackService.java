@@ -68,7 +68,7 @@ public class TrackService {
         if (page == null) {
             page = "1";
         }
-        String apiUrl = Utils.url("/url") + "/track/save-top-tracks?page=" + page;
+        String apiUrl = Utils.getLoaderURL() + "/track/save-top-tracks?page=" + page;
         return getTracks(apiUrl);
     }
 
@@ -77,7 +77,7 @@ public class TrackService {
             page = "1";
         }
         String encodedArtist = URLEncoder.encode(artist, StandardCharsets.UTF_8);
-        String apiUrl = Utils.url("/url") + "/track/save-top-tracks-by-artist?artist=" + encodedArtist + "&page=" + page;
+        String apiUrl = Utils.getLoaderURL() + "/track/save-top-tracks-by-artist?artist=" + encodedArtist + "&page=" + page;
         return getTracks(apiUrl);
     }
 
