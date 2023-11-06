@@ -2,6 +2,7 @@ package com.vention.fm.servlets.track;
 
 import com.vention.fm.exception.BadRequestException;
 import com.vention.fm.service.TrackService;
+import com.vention.fm.utils.Utils;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,6 +33,18 @@ public class TrackUnblockAndSaveTopServlet extends HttpServlet {
             resp.getWriter().print(tracks);
         } catch (IOException e) {
             throw new BadRequestException(e.getMessage());
+        }
+    }
+    @Override
+    protected void service(HttpServletRequest req, HttpServletResponse resp) {
+        String method = req.getMethod();
+        String requestURI = req.getRequestURI();
+        if (method.equals("GET") && requestURI.equals("/track/save-top-tracks")) {
+            doGet(req, resp);
+        } else if (method.equals("POST") && requestURI.equals("/track/unblock")) {
+            doPost(req, resp);
+        } else {
+            Utils.methodNotAllowed(req, resp);
         }
     }
 }

@@ -34,4 +34,16 @@ public class ArtistBlockAndGetAllServlet extends HttpServlet {
             throw new BadRequestException(e.getMessage());
         }
     }
+    @Override
+    protected void service(HttpServletRequest req, HttpServletResponse resp) {
+        String method = req.getMethod();
+        String requestURI = req.getRequestURI();
+        if (method.equals("GET") && requestURI.equals("/artist/get-all")) {
+            doGet(req, resp);
+        } else if (method.equals("POST") && requestURI.equals("/artist/block")) {
+            doPost(req, resp);
+        } else {
+            Utils.methodNotAllowed(req, resp);
+        }
+    }
 }

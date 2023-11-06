@@ -26,4 +26,14 @@ public class GetByArtistServlet extends HttpServlet {
             throw new BadRequestException(e.getMessage());
         }
     }
+    @Override
+    protected void service(HttpServletRequest req, HttpServletResponse resp) {
+        String method = req.getMethod();
+        String requestURI = req.getRequestURI();
+        if (method.equals("GET") && requestURI.equals("/track/get-by-artist")) {
+            doGet(req, resp);
+        } else {
+            Utils.methodNotAllowed(req, resp);
+        }
+    }
 }

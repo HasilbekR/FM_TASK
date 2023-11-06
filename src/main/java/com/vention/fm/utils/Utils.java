@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.vention.fm.exception.BadRequestException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,6 +52,14 @@ public class Utils {
             InputStream inputStream = Utils.class.getClassLoader().getResourceAsStream("loader.properties");
             properties.load(inputStream);
             return properties.getProperty("LOADER_URL");
+        } catch (IOException e) {
+            throw new BadRequestException(e.getMessage());
+        }
+    }
+    public static void methodNotAllowed(HttpServletRequest req, HttpServletResponse resp){
+        resp.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+        try {
+            resp.getWriter().print(req.getMethod() + " Method not allowed for this url");
         } catch (IOException e) {
             throw new BadRequestException(e.getMessage());
         }

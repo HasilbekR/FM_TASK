@@ -16,11 +16,13 @@ import java.util.UUID;
 public class UserRepositoryImpl implements UserRepository {
     private final Connection connection = Utils.getConnection();
     private static final Logger log = LoggerFactory.getLogger(UserRepositoryImpl.class);
+    private PreparedStatement preparedStatement = null;
+    private ResultSet resultSet = null;
 
     @Override
     public void save(User user) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(INSERT);
+            preparedStatement = connection.prepareStatement(INSERT);
             DatabaseUtils.setValues(preparedStatement, user);
             preparedStatement.setString(5, user.getUsername());
             preparedStatement.setString(6, user.getEmail());
@@ -31,15 +33,17 @@ public class UserRepositoryImpl implements UserRepository {
         } catch (SQLException e) {
             log.error("Error occurred while saving user", e);
             throw new BadRequestException(e.getMessage());
+        } finally {
+            DatabaseUtils.close(resultSet, preparedStatement);
         }
     }
 
     @Override
     public User getById(UUID userId) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(GET_BY_ID);
+            preparedStatement = connection.prepareStatement(GET_BY_ID);
             preparedStatement.setObject(1, userId);
-            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 return ResultSetMapper.mapUser(resultSet);
             } else {
@@ -48,6 +52,8 @@ public class UserRepositoryImpl implements UserRepository {
         } catch (SQLException e) {
             log.error("Error occurred while retrieving user", e);
             throw new BadRequestException(e.getMessage());
+        } finally {
+            DatabaseUtils.close(resultSet, preparedStatement);
         }
     }
 
@@ -64,9 +70,9 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public List<User> getAllUsers(Boolean isBlocked) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(GET_ALL_USERS);
+            preparedStatement = connection.prepareStatement(GET_ALL_USERS);
             preparedStatement.setObject(1, isBlocked);
-            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet = preparedStatement.executeQuery();
             List<User> users = new LinkedList<>();
             while (resultSet.next()) {
                 users.add(ResultSetMapper.mapUser(resultSet));
@@ -75,15 +81,17 @@ public class UserRepositoryImpl implements UserRepository {
         } catch (SQLException e) {
             log.error("Error occurred while retrieving users", e);
             throw new BadRequestException(e.getMessage());
+        } finally {
+            DatabaseUtils.close(resultSet, preparedStatement);
         }
     }
 
     @Override
     public String getUserRole(UUID userId) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(GET_USER_ROLE);
+            preparedStatement = connection.prepareStatement(GET_USER_ROLE);
             preparedStatement.setObject(1, userId);
-            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 return resultSet.getString(1);
             } else {
@@ -92,6 +100,8 @@ public class UserRepositoryImpl implements UserRepository {
         } catch (SQLException e) {
             log.error("Error occurred while retrieving user role", e);
             throw new BadRequestException(e.getMessage());
+        } finally {
+            DatabaseUtils.close(resultSet, preparedStatement);
         }
     }
 
@@ -107,9 +117,9 @@ public class UserRepositoryImpl implements UserRepository {
 
     private User getUserEntity(String email, String getByEmail) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(getByEmail);
+            preparedStatement = connection.prepareStatement(getByEmail);
             preparedStatement.setString(1, email);
-            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 return ResultSetMapper.mapUser(resultSet);
             } else {
@@ -118,6 +128,8 @@ public class UserRepositoryImpl implements UserRepository {
         } catch (SQLException e) {
             log.error("Error occurred while retrieving user", e);
             throw new BadRequestException(e.getMessage());
+        } finally {
+            DatabaseUtils.close(resultSet, preparedStatement);
         }
     }
 }

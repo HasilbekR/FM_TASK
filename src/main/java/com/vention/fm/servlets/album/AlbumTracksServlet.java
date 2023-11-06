@@ -52,4 +52,22 @@ public class AlbumTracksServlet extends HttpServlet {
             throw new BadRequestException(e.getMessage());
         }
     }
+
+    //I need service method to prevent from methods that are not existed in this servlet
+    //and I have to check if uri is correct for this doXXX method,
+    //otherwise any uri with doXXX method can send request to this method
+    @Override
+    protected void service(HttpServletRequest req, HttpServletResponse resp) {
+        String method = req.getMethod();
+        String requestURI = req.getRequestURI();
+        if (method.equals("GET") && requestURI.equals("/album/get-album")) {
+            doGet(req, resp);
+        } else if (method.equals("POST") && requestURI.equals("/album/add-track")) {
+            doPost(req, resp);
+        } else if (method.equals("DELETE") && requestURI.equals("/album/remove-track")) {
+            doDelete(req, resp);
+        } else {
+            Utils.methodNotAllowed(req, resp);
+        }
+    }
 }

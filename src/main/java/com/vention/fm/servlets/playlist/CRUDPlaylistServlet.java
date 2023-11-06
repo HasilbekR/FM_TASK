@@ -29,6 +29,7 @@ public class CRUDPlaylistServlet extends HttpServlet {
         }
     }
 
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
         try {
@@ -42,24 +43,54 @@ public class CRUDPlaylistServlet extends HttpServlet {
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) {
-        try {
-            PlaylistRequestDto playlistResponseDto = objectMapper.readValue(req.getReader(), PlaylistRequestDto.class);
-            String result = playlistService.update(playlistResponseDto);
-            resp.getWriter().print(result);
-        } catch (IOException e) {
-            throw new BadRequestException(e.getMessage());
+        String method = req.getRequestURI();
+        if ("/playlist/update".equals(method)) {
+            try {
+                PlaylistRequestDto playlistResponseDto = objectMapper.readValue(req.getReader(), PlaylistRequestDto.class);
+                String result = playlistService.update(playlistResponseDto);
+                resp.getWriter().print(result);
+            } catch (IOException e) {
+                throw new BadRequestException(e.getMessage());
+            }
+        } else {
+            Utils.methodNotAllowed(req, resp);
         }
     }
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) {
-        try {
-            String playlistName = req.getParameter("name");
-            UUID ownerId = UUID.fromString(req.getParameter("userId"));
-            String result = playlistService.delete(playlistName, ownerId);
-            resp.getWriter().print(result);
-        } catch (IOException e) {
-            throw new BadRequestException(e.getMessage());
+        String method = req.getRequestURI();
+        if ("/playlist/delete".equals(method)) {
+            try {
+                String playlistName = req.getParameter("name");
+                UUID ownerId = UUID.fromString(req.getParameter("userId"));
+                String result = playlistService.delete(playlistName, ownerId);
+                resp.getWriter().print(result);
+            } catch (IOException e) {
+                throw new BadRequestException(e.getMessage());
+            }
+        } else {
+            Utils.methodNotAllowed(req, resp);
+        }
+    }
+
+    //I need service method to prevent from methods that are not existed in this servlet
+    //and I have to check if uri is correct for this doXXX method,
+    //otherwise any uri with doXXX method can send request to this method
+    @Override
+    protected void service(HttpServletRequest req, HttpServletResponse resp) {
+        String method = req.getMethod();
+        String requestURI = req.getRequestURI();
+        if (method.equals("GET") && requestURI.equals("/playlist/get-my-playlists")) {
+            doGet(req, resp);
+        } else if (method.equals("POST") && requestURI.equals("/playlist/save")) {
+            doPost(req, resp);
+        } else if (method.equals("PUT") && requestURI.equals("/playlist/update")) {
+            doPut(req, resp);
+        } else if (method.equals("DELETE") && requestURI.equals("/playlist/delete")) {
+            doDelete(req, resp);
+        } else {
+            Utils.methodNotAllowed(req, resp);
         }
     }
 }

@@ -15,13 +15,14 @@ import java.util.UUID;
 
 public class TrackRepositoryImpl implements TrackRepository {
     private final Connection connection = Utils.getConnection();
-
     private static final Logger log = LoggerFactory.getLogger(TrackRepositoryImpl.class);
+    private PreparedStatement preparedStatement = null;
+    private ResultSet resultSet = null;
 
     @Override
     public void save(Track track) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(INSERT);
+            preparedStatement = connection.prepareStatement(INSERT);
             DatabaseUtils.setValues(preparedStatement, track);
             preparedStatement.setString(5, track.getName());
             preparedStatement.setString(6, track.getUrl());
@@ -37,15 +38,17 @@ public class TrackRepositoryImpl implements TrackRepository {
         } catch (SQLException e) {
             log.error("Error occurred while saving track", e);
             throw new BadRequestException(e.getMessage());
+        } finally {
+            DatabaseUtils.close(resultSet, preparedStatement);
         }
     }
 
     @Override
     public Track getById(UUID trackId) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(GET_BY_ID);
+            preparedStatement = connection.prepareStatement(GET_BY_ID);
             preparedStatement.setObject(1, trackId);
-            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 return ResultSetMapper.mapTrack(resultSet);
             } else {
@@ -54,15 +57,17 @@ public class TrackRepositoryImpl implements TrackRepository {
         } catch (SQLException e) {
             log.error("Error occurred while retrieving track", e);
             throw new BadRequestException(e.getMessage());
+        } finally {
+            DatabaseUtils.close(resultSet, preparedStatement);
         }
     }
 
     @Override
     public Track getTrackByName(String name) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(GET_BY_NAME);
+            preparedStatement = connection.prepareStatement(GET_BY_NAME);
             preparedStatement.setString(1, name);
-            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 return ResultSetMapper.mapTrack(resultSet);
             } else {
@@ -71,15 +76,17 @@ public class TrackRepositoryImpl implements TrackRepository {
         } catch (SQLException e) {
             log.error("Error occurred while retrieving track", e);
             throw new BadRequestException(e.getMessage());
+        } finally {
+            DatabaseUtils.close(resultSet, preparedStatement);
         }
     }
 
     @Override
     public Track getTrackState(String trackName) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(GET_TRACK_STATE);
+            preparedStatement = connection.prepareStatement(GET_TRACK_STATE);
             preparedStatement.setString(1, trackName);
-            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 return ResultSetMapper.mapTrackState(resultSet);
             } else {
@@ -88,16 +95,18 @@ public class TrackRepositoryImpl implements TrackRepository {
         } catch (SQLException e) {
             log.error("Error occurred while retrieving track state", e);
             throw new BadRequestException(e.getMessage());
+        } finally {
+            DatabaseUtils.close(resultSet, preparedStatement);
         }
     }
 
     @Override
     public Track getTrackByNameAndArtist(String name, UUID artistId) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(GET_TRACK_WITH_ARTIST);
+            preparedStatement = connection.prepareStatement(GET_TRACK_WITH_ARTIST);
             preparedStatement.setString(1, name);
             preparedStatement.setObject(2, artistId);
-            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 return ResultSetMapper.mapTrack(resultSet);
             } else {
@@ -106,15 +115,17 @@ public class TrackRepositoryImpl implements TrackRepository {
         } catch (SQLException e) {
             log.error("Error occurred while retrieving track", e);
             throw new BadRequestException(e.getMessage());
+        } finally {
+            DatabaseUtils.close(resultSet, preparedStatement);
         }
     }
 
     @Override
     public List<Track> getTrackListByArtist(UUID artistId) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(GET_BY_ARTIST);
+            preparedStatement = connection.prepareStatement(GET_BY_ARTIST);
             preparedStatement.setObject(1, artistId);
-            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet = preparedStatement.executeQuery();
             ArrayList<Track> tracks = new ArrayList<>();
             while (resultSet.next()) {
                 tracks.add(ResultSetMapper.mapTrack(resultSet));
@@ -123,14 +134,16 @@ public class TrackRepositoryImpl implements TrackRepository {
         } catch (SQLException e) {
             log.error("Error occurred while retrieving tracks", e);
             throw new BadRequestException(e.getMessage());
+        } finally {
+            DatabaseUtils.close(resultSet, preparedStatement);
         }
     }
 
     @Override
     public List<Track> getAll() {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(GET_QUERY);
-            ResultSet resultSet = preparedStatement.executeQuery();
+            preparedStatement = connection.prepareStatement(GET_QUERY);
+            resultSet = preparedStatement.executeQuery();
             ArrayList<Track> tracks = new ArrayList<>();
             while (resultSet.next()) {
                 tracks.add(ResultSetMapper.mapTrack(resultSet));
@@ -139,15 +152,17 @@ public class TrackRepositoryImpl implements TrackRepository {
         } catch (SQLException e) {
             log.error("Error occurred while retrieving tracks", e);
             throw new BadRequestException(e.getMessage());
+        } finally {
+            DatabaseUtils.close(resultSet, preparedStatement);
         }
     }
 
     @Override
     public List<Track> searchTracksByName(String name) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(SEARCH_BY_NAME);
+            preparedStatement = connection.prepareStatement(SEARCH_BY_NAME);
             preparedStatement.setString(1, "%" + name + "%");
-            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet = preparedStatement.executeQuery();
             ArrayList<Track> tracks = new ArrayList<>();
             while (resultSet.next()) {
                 tracks.add(ResultSetMapper.mapTrack(resultSet));
@@ -156,13 +171,15 @@ public class TrackRepositoryImpl implements TrackRepository {
         } catch (SQLException e) {
             log.error("Error occurred while retrieving tracks", e);
             throw new BadRequestException(e.getMessage());
+        } finally {
+            DatabaseUtils.close(resultSet, preparedStatement);
         }
     }
 
     @Override
     public void update(Track track) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(UPDATE);
+            preparedStatement = connection.prepareStatement(UPDATE);
             preparedStatement.setObject(1, track.getUpdatedDate());
             preparedStatement.setString(2, track.getName());
             preparedStatement.setString(3, track.getUrl());
@@ -174,6 +191,8 @@ public class TrackRepositoryImpl implements TrackRepository {
         } catch (SQLException e) {
             log.error("Error occurred while updating track", e);
             throw new BadRequestException(e.getMessage());
+        } finally {
+            DatabaseUtils.close(resultSet, preparedStatement);
         }
     }
 

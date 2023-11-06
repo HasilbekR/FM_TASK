@@ -20,11 +20,13 @@ import java.util.UUID;
 public class PlaylistRepositoryImpl implements PlaylistRepository {
     private final Connection connection = Utils.getConnection();
     private static final Logger log = LoggerFactory.getLogger(PlaylistRepositoryImpl.class);
+    private PreparedStatement preparedStatement = null;
+    private ResultSet resultSet = null;
 
     @Override
     public void save(Playlist playlist) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(INSERT);
+            preparedStatement = connection.prepareStatement(INSERT);
             DatabaseUtils.setValues(preparedStatement, playlist);
             preparedStatement.setString(5, playlist.getName());
             preparedStatement.setBoolean(6, playlist.getIsPublic());
@@ -35,15 +37,17 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
         } catch (SQLException e) {
             log.error("Error occurred while saving playlist", e);
             throw new BadRequestException(e.getMessage());
+        } finally {
+            DatabaseUtils.close(resultSet, preparedStatement);
         }
     }
 
     @Override
     public Playlist getById(UUID id) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(GET_BY_ID);
+            preparedStatement = connection.prepareStatement(GET_BY_ID);
             preparedStatement.setObject(1, id);
-            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 return ResultSetMapper.mapPlaylist(resultSet);
             } else {
@@ -52,15 +56,17 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
         } catch (SQLException e) {
             log.error("Error occurred while retrieving playlist", e);
             throw new BadRequestException(e.getMessage());
+        } finally {
+            DatabaseUtils.close(resultSet, preparedStatement);
         }
     }
 
     @Override
     public Playlist getPlaylistByName(String name) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(GET_BY_NAME);
+            preparedStatement = connection.prepareStatement(GET_BY_NAME);
             preparedStatement.setString(1, name);
-            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 return ResultSetMapper.mapPlaylist(resultSet);
             } else {
@@ -69,15 +75,17 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
         } catch (SQLException e) {
             log.error("Error occurred while retrieving playlist", e);
             throw new BadRequestException(e.getMessage());
+        } finally {
+            DatabaseUtils.close(resultSet, preparedStatement);
         }
     }
 
     @Override
     public Playlist getPlaylistState(String name) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(GET_PLAYLIST_STATE);
+            preparedStatement = connection.prepareStatement(GET_PLAYLIST_STATE);
             preparedStatement.setString(1, name);
-            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 return ResultSetMapper.mapPlaylistState(resultSet);
             } else {
@@ -86,15 +94,17 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
         } catch (SQLException e) {
             log.error("Error occurred while retrieving playlist state", e);
             throw new BadRequestException(e.getMessage());
+        } finally {
+            DatabaseUtils.close(resultSet, preparedStatement);
         }
     }
 
     @Override
     public List<Playlist> getAllByOwnerId(UUID ownerId) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(GET_ALL_BY_OWNER_ID);
+            preparedStatement = connection.prepareStatement(GET_ALL_BY_OWNER_ID);
             preparedStatement.setObject(1, ownerId);
-            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet = preparedStatement.executeQuery();
             List<Playlist> playlists = new ArrayList<>();
             while (resultSet.next()) {
                 playlists.add(ResultSetMapper.mapPlaylist(resultSet));
@@ -103,14 +113,16 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
         } catch (SQLException e) {
             log.error("Error occurred while retrieving playlists", e);
             throw new BadRequestException(e.getMessage());
+        } finally {
+            DatabaseUtils.close(resultSet, preparedStatement);
         }
     }
 
     @Override
     public List<Playlist> getAvailablePlaylists() {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(GET_AVAILABLE_PLAYLISTS);
-            ResultSet resultSet = preparedStatement.executeQuery();
+            preparedStatement = connection.prepareStatement(GET_AVAILABLE_PLAYLISTS);
+            resultSet = preparedStatement.executeQuery();
             List<Playlist> playlists = new ArrayList<>();
             while (resultSet.next()) {
                 playlists.add(ResultSetMapper.mapPlaylist(resultSet));
@@ -119,13 +131,15 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
         } catch (SQLException e) {
             log.error("Error occurred while retrieving available playlists", e);
             throw new BadRequestException(e.getMessage());
+        } finally {
+            DatabaseUtils.close(resultSet, preparedStatement);
         }
     }
 
     @Override
     public void update(Playlist playlist) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(UPDATE);
+            preparedStatement = connection.prepareStatement(UPDATE);
             preparedStatement.setObject(1, playlist.getUpdatedDate());
             preparedStatement.setString(2, playlist.getName());
             preparedStatement.setBoolean(3, playlist.getIsPublic());
@@ -135,13 +149,15 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
         } catch (SQLException e) {
             log.error("Error occurred while updating playlist", e);
             throw new BadRequestException(e.getMessage());
+        } finally {
+            DatabaseUtils.close(resultSet, preparedStatement);
         }
     }
 
     @Override
     public void rate(int likeCount, int dislikeCount, UUID playlistId) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(RATE);
+            preparedStatement = connection.prepareStatement(RATE);
             preparedStatement.setObject(1, LocalDateTime.now());
             preparedStatement.setInt(2, likeCount);
             preparedStatement.setInt(3, dislikeCount);
@@ -150,18 +166,22 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
         } catch (SQLException e) {
             log.error("Error occurred while rating playlist", e);
             throw new BadRequestException(e.getMessage());
+        } finally {
+            DatabaseUtils.close(resultSet, preparedStatement);
         }
     }
 
     @Override
     public void delete(UUID id) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(DELETE);
+            preparedStatement = connection.prepareStatement(DELETE);
             preparedStatement.setObject(1, id);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             log.error("Error occurred while deleting playlist", e);
             throw new BadRequestException(e.getMessage());
+        } finally {
+            DatabaseUtils.close(resultSet, preparedStatement);
         }
     }
 }

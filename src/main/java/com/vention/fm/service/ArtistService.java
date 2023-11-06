@@ -73,6 +73,10 @@ public class ArtistService {
             if (page == null) {
                 page = "1";
             }
+            boolean containsNonDigit = page.chars().anyMatch(c -> !Character.isDigit(c));
+            if(containsNonDigit){
+                throw new BadRequestException("Page should contain only numbers");
+            }
             String apiUrl = Utils.getLoaderURL() + "/artist/save-top-artists?page=" + page;
             URL url = new URL(apiUrl);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();

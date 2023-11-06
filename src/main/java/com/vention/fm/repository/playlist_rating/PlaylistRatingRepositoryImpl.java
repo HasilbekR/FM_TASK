@@ -17,13 +17,14 @@ import java.util.UUID;
 
 public class PlaylistRatingRepositoryImpl implements PlaylistRatingRepository {
     private final Connection connection = Utils.getConnection();
-
     private static final Logger log = LoggerFactory.getLogger(PlaylistRatingRepositoryImpl.class);
+    private PreparedStatement preparedStatement = null;
+    private ResultSet resultSet = null;
 
     @Override
     public void save(PlaylistRating playlistRating) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(INSERT);
+            preparedStatement = connection.prepareStatement(INSERT);
             DatabaseUtils.setValues(preparedStatement, playlistRating);
             preparedStatement.setObject(5, playlistRating.getPlaylist().getId());
             preparedStatement.setObject(6, playlistRating.getUser().getId());
@@ -32,16 +33,18 @@ public class PlaylistRatingRepositoryImpl implements PlaylistRatingRepository {
         } catch (SQLException e) {
             log.error("Error occurred while saving rating playlist", e);
             throw new BadRequestException(e.getMessage());
+        } finally {
+            DatabaseUtils.close(resultSet, preparedStatement);
         }
     }
 
     @Override
     public PlaylistRating get(UUID playlistId, UUID userId) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(GET);
+            preparedStatement = connection.prepareStatement(GET);
             preparedStatement.setObject(1, playlistId);
             preparedStatement.setObject(2, userId);
-            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 return ResultSetMapper.mapPlaylistRating(resultSet);
             } else {
@@ -50,6 +53,8 @@ public class PlaylistRatingRepositoryImpl implements PlaylistRatingRepository {
         } catch (SQLException e) {
             log.error("Error occurred while retrieving playlist rating", e);
             throw new BadRequestException(e.getMessage());
+        } finally {
+            DatabaseUtils.close(resultSet, preparedStatement);
         }
     }
 
@@ -66,7 +71,7 @@ public class PlaylistRatingRepositoryImpl implements PlaylistRatingRepository {
     @Override
     public void update(UUID playlistId, UUID userId, Boolean isLiked) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(UPDATE);
+            preparedStatement = connection.prepareStatement(UPDATE);
             preparedStatement.setObject(1, LocalDateTime.now());
             preparedStatement.setBoolean(2, isLiked);
             preparedStatement.setObject(3, playlistId);
@@ -75,19 +80,23 @@ public class PlaylistRatingRepositoryImpl implements PlaylistRatingRepository {
         } catch (SQLException e) {
             log.error("Error occurred while updating playlist rating", e);
             throw new BadRequestException(e.getMessage());
+        } finally {
+            DatabaseUtils.close(resultSet, preparedStatement);
         }
     }
 
     @Override
     public void delete(UUID playlistId, UUID userId) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(DELETE);
+            preparedStatement = connection.prepareStatement(DELETE);
             preparedStatement.setObject(1, playlistId);
             preparedStatement.setObject(2, userId);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             log.error("Error occurred while deleting playlist rating", e);
             throw new BadRequestException(e.getMessage());
+        } finally {
+            DatabaseUtils.close(resultSet, preparedStatement);
         }
     }
 }

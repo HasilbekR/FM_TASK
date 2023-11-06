@@ -11,6 +11,8 @@ import java.util.UUID;
 
 public class DatabaseUtils {
     private static final Logger log = LoggerFactory.getLogger(DatabaseUtils.class);
+    private static PreparedStatement preparedStatement = null;
+    private static ResultSet resultSet = null;
 
     public static void setValues(PreparedStatement preparedStatement, BaseModel baseModel) throws SQLException {
         preparedStatement.setObject(1, baseModel.getId());
@@ -21,9 +23,9 @@ public class DatabaseUtils {
 
     public static boolean isBlocked(UUID userId, Connection connection, String query) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement = connection.prepareStatement(query);
             preparedStatement.setObject(1, userId);
-            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 return resultSet.getBoolean(1);
             } else {
@@ -33,14 +35,16 @@ public class DatabaseUtils {
         } catch (SQLException e) {
             log.error("Error occurred while retrieving data from database", e);
             throw new BadRequestException(e.getMessage());
+        } finally {
+            DatabaseUtils.close(resultSet, preparedStatement);
         }
     }
 
     public static Integer getPerformanceData(UUID id, Connection connection, String query) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement = connection.prepareStatement(query);
             preparedStatement.setObject(1, id);
-            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 return resultSet.getInt(1);
             } else {
@@ -49,12 +53,14 @@ public class DatabaseUtils {
         } catch (SQLException e) {
             log.error("Error occurred while retrieving data from database", e);
             throw new BadRequestException(e.getMessage());
+        } finally {
+            DatabaseUtils.close(resultSet, preparedStatement);
         }
     }
 
     public static void updateTrackPosition(UUID id, int position, Connection connection, String query) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement = connection.prepareStatement(query);
             preparedStatement.setObject(1, LocalDateTime.now());
             preparedStatement.setInt(2, position);
             preparedStatement.setObject(3, id);
@@ -62,30 +68,61 @@ public class DatabaseUtils {
         } catch (SQLException e) {
             log.error("Error occurred while retrieving data from database", e);
             throw new BadRequestException(e.getMessage());
+        } finally {
+            DatabaseUtils.close(resultSet, preparedStatement);
         }
     }
 
     public static void removeTrack(UUID id, UUID trackId, Connection connection, String query) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement = connection.prepareStatement(query);
             preparedStatement.setObject(1, id);
             preparedStatement.setObject(2, trackId);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             log.error("Error occurred while retrieving data from database", e);
             throw new BadRequestException(e.getMessage());
+        } finally {
+            DatabaseUtils.close(resultSet, preparedStatement);
         }
     }
 
     public static void block(Boolean isBlocked, String name, Connection connection, String query) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement = connection.prepareStatement(query);
             preparedStatement.setBoolean(1, isBlocked);
             preparedStatement.setString(2, name);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             log.error("Error occurred while retrieving data from database", e);
             throw new BadRequestException(e.getMessage());
+        } finally {
+            DatabaseUtils.close(resultSet, preparedStatement);
+        }
+    }
+    public static void close(ResultSet resultSet, Statement prepareStatement)
+    {
+        if (resultSet!=null)
+        {
+            try
+            {
+                resultSet.close();
+
+            }
+            catch(SQLException e)
+            {
+                log.error("The result set cannot be closed ", e);
+            }
+        }
+        if (prepareStatement != null)
+        {
+            try
+            {
+                prepareStatement.close();
+            } catch (SQLException e)
+            {
+                log.error("The statement cannot be closed ", e);
+            }
         }
     }
 }

@@ -68,6 +68,10 @@ public class TrackService {
         if (page == null) {
             page = "1";
         }
+        boolean containsNonDigit = page.chars().anyMatch(c -> !Character.isDigit(c));
+        if(containsNonDigit){
+            throw new BadRequestException("Page should contain only numbers");
+        }
         String apiUrl = Utils.getLoaderURL() + "/track/save-top-tracks?page=" + page;
         return getTracks(apiUrl);
     }
@@ -75,6 +79,10 @@ public class TrackService {
     public String saveTopTracksByArtist(String artist, String page) {
         if (page == null) {
             page = "1";
+        }
+        boolean containsNonDigit = page.chars().anyMatch(c -> !Character.isDigit(c));
+        if(containsNonDigit){
+            throw new BadRequestException("Page should contain only numbers");
         }
         String encodedArtist = URLEncoder.encode(artist, StandardCharsets.UTF_8);
         String apiUrl = Utils.getLoaderURL() + "/track/save-top-tracks-by-artist?artist=" + encodedArtist + "&page=" + page;
