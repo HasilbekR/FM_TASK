@@ -33,7 +33,7 @@ public class TrackCreateAndRetrieveServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
         try {
             String name = req.getParameter("name");
-            String json = objectMapper.writeValueAsString(trackService.getTrackByName(name));
+            String json = objectMapper.writeValueAsString(trackService.getTrackDto(name));
             resp.getWriter().print(json);
         } catch (IOException e) {
             throw new BadRequestException(e.getMessage());
