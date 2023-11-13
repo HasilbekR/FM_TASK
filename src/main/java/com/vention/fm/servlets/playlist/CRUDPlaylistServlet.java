@@ -43,34 +43,24 @@ public class CRUDPlaylistServlet extends HttpServlet {
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) {
-        String method = req.getRequestURI();
-        if ("/playlist/update".equals(method)) {
-            try {
-                PlaylistRequestDto playlistResponseDto = objectMapper.readValue(req.getReader(), PlaylistRequestDto.class);
-                String result = playlistService.update(playlistResponseDto);
-                resp.getWriter().print(result);
-            } catch (IOException e) {
-                throw new BadRequestException(e.getMessage());
-            }
-        } else {
-            Utils.methodNotAllowed(req, resp);
+        try {
+            PlaylistRequestDto playlistResponseDto = objectMapper.readValue(req.getReader(), PlaylistRequestDto.class);
+            String result = playlistService.update(playlistResponseDto);
+            resp.getWriter().print(result);
+        } catch (IOException e) {
+            throw new BadRequestException(e.getMessage());
         }
     }
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) {
-        String method = req.getRequestURI();
-        if ("/playlist/delete".equals(method)) {
-            try {
-                String playlistName = req.getParameter("name");
-                UUID ownerId = UUID.fromString(req.getParameter("userId"));
-                String result = playlistService.delete(playlistName, ownerId);
-                resp.getWriter().print(result);
-            } catch (IOException e) {
-                throw new BadRequestException(e.getMessage());
-            }
-        } else {
-            Utils.methodNotAllowed(req, resp);
+        try {
+            String playlistName = req.getParameter("name");
+            UUID ownerId = UUID.fromString(req.getParameter("userId"));
+            String result = playlistService.delete(playlistName, ownerId);
+            resp.getWriter().print(result);
+        } catch (IOException e) {
+            throw new BadRequestException(e.getMessage());
         }
     }
 
