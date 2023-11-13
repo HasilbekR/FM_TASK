@@ -52,4 +52,18 @@ public class PlaylistTracksServlet extends HttpServlet {
             throw new BadRequestException(e.getMessage());
         }
     }
+    @Override
+    protected void service(HttpServletRequest req, HttpServletResponse resp) {
+        String method = req.getMethod();
+        String requestURI = req.getRequestURI();
+        if (method.equals("GET") && requestURI.equals("/playlist/get-playlist")) {
+            doGet(req, resp);
+        } else if (method.equals("POST") && requestURI.equals("/playlist/add-track")) {
+            doPost(req, resp);
+        } else if (method.equals("DELETE") && requestURI.equals("/playlist/remove-track")) {
+            doDelete(req, resp);
+        } else {
+            Utils.methodNotAllowed(req, resp);
+        }
+    }
 }

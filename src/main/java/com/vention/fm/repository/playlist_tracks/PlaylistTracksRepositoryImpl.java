@@ -18,13 +18,14 @@ import java.util.UUID;
 
 public class PlaylistTracksRepositoryImpl implements PlaylistTracksRepository {
     private final Connection connection = Utils.getConnection();
-
     private static final Logger log = LoggerFactory.getLogger(PlaylistTracksRepositoryImpl.class);
+    private PreparedStatement preparedStatement = null;
+    private ResultSet resultSet = null;
 
     @Override
     public void save(PlaylistTracks playlistTracks) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(INSERT);
+            preparedStatement = connection.prepareStatement(INSERT);
             DatabaseUtils.setValues(preparedStatement, playlistTracks);
             preparedStatement.setObject(5, playlistTracks.getPlaylist().getId());
             preparedStatement.setObject(6, playlistTracks.getTrack().getId());
@@ -33,15 +34,17 @@ public class PlaylistTracksRepositoryImpl implements PlaylistTracksRepository {
         } catch (SQLException e) {
             log.error("Error occurred while saving track to playlist", e);
             throw new BadRequestException(e.getMessage());
+        } finally {
+            DatabaseUtils.close(resultSet, preparedStatement);
         }
     }
 
     @Override
     public PlaylistTracks getById(UUID playlistTrackId) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(GET_BY_ID);
+            preparedStatement = connection.prepareStatement(GET_BY_ID);
             preparedStatement.setObject(1, playlistTrackId);
-            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 return ResultSetMapper.mapPlaylistTracks(resultSet);
             } else {
@@ -50,15 +53,17 @@ public class PlaylistTracksRepositoryImpl implements PlaylistTracksRepository {
         } catch (SQLException e) {
             log.error("Error occurred while retrieving playlist track", e);
             throw new BadRequestException(e.getMessage());
+        } finally {
+            DatabaseUtils.close(resultSet, preparedStatement);
         }
     }
 
     @Override
     public List<PlaylistTracks> getPlaylistTracks(UUID playlistId) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(GET_PLAYLIST_TRACKS);
+            preparedStatement = connection.prepareStatement(GET_PLAYLIST_TRACKS);
             preparedStatement.setObject(1, playlistId);
-            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet = preparedStatement.executeQuery();
             List<PlaylistTracks> playlistTracksList = new ArrayList<>();
             while (resultSet.next()) {
                 playlistTracksList.add(ResultSetMapper.mapPlaylistTracks(resultSet));
@@ -67,17 +72,19 @@ public class PlaylistTracksRepositoryImpl implements PlaylistTracksRepository {
         } catch (SQLException e) {
             log.error("Error occurred while retrieving playlist tracks", e);
             throw new BadRequestException(e.getMessage());
+        } finally {
+            DatabaseUtils.close(resultSet, preparedStatement);
         }
     }
 
     @Override
     public List<PlaylistTracks> getPlaylistTracksToReorder(UUID playlistId, UUID trackId) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(GET_TRACKS_FOR_REORDER);
+            preparedStatement = connection.prepareStatement(GET_TRACKS_FOR_REORDER);
             preparedStatement.setObject(1, playlistId);
             preparedStatement.setObject(2, trackId);
             preparedStatement.setObject(3, playlistId);
-            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet = preparedStatement.executeQuery();
             List<PlaylistTracks> playlistTracksList = new ArrayList<>();
             while (resultSet.next()) {
                 playlistTracksList.add(ResultSetMapper.mapPlaylistTracks(resultSet));
@@ -86,6 +93,8 @@ public class PlaylistTracksRepositoryImpl implements PlaylistTracksRepository {
         } catch (SQLException e) {
             log.error("Error occurred while retrieving playlist tracks for reordering", e);
             throw new BadRequestException(e.getMessage());
+        } finally {
+            DatabaseUtils.close(resultSet, preparedStatement);
         }
     }
 

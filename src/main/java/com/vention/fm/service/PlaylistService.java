@@ -105,7 +105,7 @@ public class PlaylistService {
                 playlistRepository.delete(playlistByName.getId());
                 return "Playlist deleted successfully";
             } else {
-                throw new AccessRestrictedException("You do not have access to DeleteAlbumServlet this playlist");
+                throw new AccessRestrictedException("You do not have access to delete this playlist");
             }
         } else {
             throw new DataNotFoundException("Playlist with name " + playlistName + " not found");

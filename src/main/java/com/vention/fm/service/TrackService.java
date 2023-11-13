@@ -68,6 +68,10 @@ public class TrackService {
         if (page == null) {
             page = "1";
         }
+        boolean containsNonDigit = page.chars().anyMatch(c -> !Character.isDigit(c));
+        if (containsNonDigit) {
+            throw new BadRequestException("Page should contain only numbers");
+        }
         String apiUrl = Utils.getLoaderURL() + "/track/save-top-tracks?page=" + page;
         return getTracks(apiUrl);
     }
@@ -76,18 +80,27 @@ public class TrackService {
         if (page == null) {
             page = "1";
         }
+        boolean containsNonDigit = page.chars().anyMatch(c -> !Character.isDigit(c));
+        if (containsNonDigit) {
+            throw new BadRequestException("Page should contain only numbers");
+        }
         String encodedArtist = URLEncoder.encode(artist, StandardCharsets.UTF_8);
         String apiUrl = Utils.getLoaderURL() + "/track/save-top-tracks-by-artist?artist=" + encodedArtist + "&page=" + page;
         return getTracks(apiUrl);
     }
 
-    public TrackDto getTrackByName(String name) {
+    public TrackDto getTrackDto(String name) {
+        Track track = getTrackByName(name);
+        return mapper.trackToDto(track);
+    }
+
+    public Track getTrackByName(String name) {
         if (name == null) {
             throw new DataNotFoundException("Please provide the track name");
         }
         Track track = trackRepository.getTrackByName(name);
         if (track != null) {
-            return mapper.trackToDto(track);
+            return track;
         } else {
             throw new DataNotFoundException("Track with name " + name + " not found");
         }

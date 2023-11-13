@@ -26,9 +26,13 @@ public class PlaylistTracksService {
     private final TrackMapper trackMapper = Mappers.getMapper(TrackMapper.class);
 
     public String addPlaylist(PlaylistRequestDto trackDto) throws AccessRestrictedException {
-        Track trackState = trackService.getTrackState(trackDto.getTrackName());
+        Track track = trackService.getTrackByName(trackDto.getTrackName());
 
-        if (trackState.getIsBlocked()) {
+        if (track.getArtist().getIsBlocked()) {
+            throw new AccessRestrictedException("Blocked artists cannot be added into playlist");
+        }
+
+        if (track.getIsBlocked()) {
             throw new AccessRestrictedException("Blocked tracks cannot be added into playlist");
         }
 
@@ -36,7 +40,7 @@ public class PlaylistTracksService {
         if (playlistState != null) {
             if (playlistState.getOwner().getId().equals(trackDto.getUserId())) {
                 int position = playlistTracksRepository.countPlaylistTracks(playlistState.getId()) + 1;
-                PlaylistTracks playlistTracks = new PlaylistTracks(playlistState, trackState, position);
+                PlaylistTracks playlistTracks = new PlaylistTracks(playlistState, track, position);
                 playlistTracksRepository.save(playlistTracks);
             } else {
                 throw new AuthenticationFailedException("Access denied to the playlist");

@@ -16,11 +16,13 @@ import java.util.UUID;
 public class ArtistRepositoryImpl implements ArtistRepository {
     private final Connection connection = Utils.getConnection();
     private static final Logger log = LoggerFactory.getLogger(ArtistRepositoryImpl.class);
+    private PreparedStatement preparedStatement = null;
+    private ResultSet resultSet = null;
 
     @Override
     public void save(Artist artist) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(INSERT);
+            preparedStatement = connection.prepareStatement(INSERT);
             DatabaseUtils.setValues(preparedStatement, artist);
             preparedStatement.setString(5, artist.getName());
             preparedStatement.setString(6, artist.getUrl());
@@ -38,15 +40,17 @@ public class ArtistRepositoryImpl implements ArtistRepository {
         } catch (SQLException e) {
             log.error("Error occurred while saving artist", e);
             throw new BadRequestException(e.getMessage());
+        } finally {
+            DatabaseUtils.close(resultSet, preparedStatement);
         }
     }
 
     @Override
     public Artist getArtistByName(String name) {
         try {
-            PreparedStatement statement = connection.prepareStatement(GET_BY_NAME);
-            statement.setString(1, name);
-            ResultSet resultSet = statement.executeQuery();
+            preparedStatement = connection.prepareStatement(GET_BY_NAME);
+            preparedStatement.setString(1, name);
+            ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 return ResultSetMapper.mapArtist(resultSet);
             } else {
@@ -55,15 +59,17 @@ public class ArtistRepositoryImpl implements ArtistRepository {
         } catch (SQLException e) {
             log.error("Error occurred while retrieving artist", e);
             throw new BadRequestException(e.getMessage());
+        } finally {
+            DatabaseUtils.close(resultSet, preparedStatement);
         }
     }
 
     @Override
     public Artist getArtistState(String name) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(GET_ARTIST_STATE);
+            preparedStatement = connection.prepareStatement(GET_ARTIST_STATE);
             preparedStatement.setString(1, name);
-            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 return ResultSetMapper.mapArtistState(resultSet);
             } else {
@@ -72,14 +78,16 @@ public class ArtistRepositoryImpl implements ArtistRepository {
         } catch (SQLException e) {
             log.error("Error occurred while retrieving artist state", e);
             throw new BadRequestException(e.getMessage());
+        } finally {
+            DatabaseUtils.close(resultSet, preparedStatement);
         }
     }
 
     @Override
     public List<Artist> getAll() {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(GET_QUERY);
-            ResultSet resultSet = preparedStatement.executeQuery();
+            preparedStatement = connection.prepareStatement(GET_QUERY);
+            resultSet = preparedStatement.executeQuery();
             List<Artist> artists = new ArrayList<>();
             while (resultSet.next()) {
                 artists.add(ResultSetMapper.mapArtist(resultSet));
@@ -88,15 +96,17 @@ public class ArtistRepositoryImpl implements ArtistRepository {
         } catch (SQLException e) {
             log.error("Error occurred while retrieving artists", e);
             throw new BadRequestException(e.getMessage());
+        } finally {
+            DatabaseUtils.close(resultSet, preparedStatement);
         }
     }
 
     @Override
     public UUID getIdByName(String name) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(GET_ID_BY_NAME);
+            preparedStatement = connection.prepareStatement(GET_ID_BY_NAME);
             preparedStatement.setString(1, name);
-            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 return resultSet.getObject(1, UUID.class);
             } else {
@@ -105,6 +115,8 @@ public class ArtistRepositoryImpl implements ArtistRepository {
         } catch (SQLException e) {
             log.error("Error occurred while retrieving artist id", e);
             throw new BadRequestException(e.getMessage());
+        } finally {
+            DatabaseUtils.close(resultSet, preparedStatement);
         }
     }
 
@@ -126,7 +138,7 @@ public class ArtistRepositoryImpl implements ArtistRepository {
     @Override
     public void update(Artist artist) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(UPDATE);
+            preparedStatement = connection.prepareStatement(UPDATE);
             preparedStatement.setObject(1, artist.getUpdatedDate());
             if (artist.getPlaycount() != null && artist.getPlaycount() != 0) {
                 preparedStatement.setInt(2, artist.getPlaycount());
@@ -143,6 +155,8 @@ public class ArtistRepositoryImpl implements ArtistRepository {
         } catch (SQLException e) {
             log.error("Error occurred while updating artist", e);
             throw new BadRequestException(e.getMessage());
+        } finally {
+            DatabaseUtils.close(resultSet, preparedStatement);
         }
     }
 

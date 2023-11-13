@@ -40,4 +40,17 @@ public class RegisterAndRetrieveActiveUsersServlet extends HttpServlet {
             throw new BadRequestException(e.getMessage());
         }
     }
+
+    @Override
+    protected void service(HttpServletRequest req, HttpServletResponse resp) {
+        String method = req.getMethod();
+        String requestURI = req.getRequestURI();
+        if (method.equals("GET") && requestURI.equals("/user/get-all-active-users")) {
+            doGet(req, resp);
+        } else if (method.equals("POST") && requestURI.equals("/user/sign-up")) {
+            doPost(req, resp);
+        } else {
+            Utils.methodNotAllowed(req, resp);
+        }
+    }
 }

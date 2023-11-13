@@ -19,11 +19,13 @@ import java.util.UUID;
 public class AlbumTracksRepositoryImpl implements AlbumTracksRepository {
     private final Connection connection = Utils.getConnection();
     private static final Logger log = LoggerFactory.getLogger(AlbumTracksRepositoryImpl.class);
+    private PreparedStatement preparedStatement = null;
+    private ResultSet resultSet = null;
 
     @Override
     public void save(AlbumTracks albumTracks) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(INSERT);
+            preparedStatement = connection.prepareStatement(INSERT);
             DatabaseUtils.setValues(preparedStatement, albumTracks);
             preparedStatement.setObject(5, albumTracks.getAlbum().getId());
             preparedStatement.setObject(6, albumTracks.getTrack().getId());
@@ -32,15 +34,17 @@ public class AlbumTracksRepositoryImpl implements AlbumTracksRepository {
         } catch (SQLException e) {
             log.error("Error occurred while saving track to album", e);
             throw new BadRequestException(e.getMessage());
+        } finally {
+            DatabaseUtils.close(resultSet, preparedStatement);
         }
     }
 
     @Override
     public List<AlbumTracks> getAlbumTracks(UUID albumId) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(GET_ALBUM_TRACKS);
+            preparedStatement = connection.prepareStatement(GET_ALBUM_TRACKS);
             preparedStatement.setObject(1, albumId);
-            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet = preparedStatement.executeQuery();
             List<AlbumTracks> albumTracks = new LinkedList<>();
             while (resultSet.next()) {
                 albumTracks.add(ResultSetMapper.mapAlbumTracks(resultSet));
@@ -49,17 +53,19 @@ public class AlbumTracksRepositoryImpl implements AlbumTracksRepository {
         } catch (SQLException e) {
             log.error("Error occurred while retrieving album tracks", e);
             throw new BadRequestException(e.getMessage());
+        } finally {
+            DatabaseUtils.close(resultSet, preparedStatement);
         }
     }
 
     @Override
     public List<AlbumTracks> getAlbumTracksToReorder(UUID albumId, UUID trackId) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(GET_TRACKS_FOR_REORDER);
+            preparedStatement = connection.prepareStatement(GET_TRACKS_FOR_REORDER);
             preparedStatement.setObject(1, albumId);
             preparedStatement.setObject(2, trackId);
             preparedStatement.setObject(3, albumId);
-            ResultSet resultSet = preparedStatement.executeQuery();
+            resultSet = preparedStatement.executeQuery();
             List<AlbumTracks> albumTracksList = new LinkedList<>();
             while (resultSet.next()) {
                 albumTracksList.add(ResultSetMapper.mapAlbumTracks(resultSet));
@@ -68,6 +74,8 @@ public class AlbumTracksRepositoryImpl implements AlbumTracksRepository {
         } catch (SQLException e) {
             log.error("Error occurred while retrieving album tracks for reordering", e);
             throw new BadRequestException(e.getMessage());
+        } finally {
+            DatabaseUtils.close(resultSet, preparedStatement);
         }
     }
 

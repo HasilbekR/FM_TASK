@@ -40,4 +40,16 @@ public class LoginAndRetrieveBlockedUsersServlet extends HttpServlet {
             throw new BadRequestException(e.getMessage());
         }
     }
+    @Override
+    protected void service(HttpServletRequest req, HttpServletResponse resp) {
+        String method = req.getMethod();
+        String requestURI = req.getRequestURI();
+        if (method.equals("GET") && requestURI.equals("/user/get-all-blocked-users")) {
+            doGet(req, resp);
+        } else if (method.equals("POST") && requestURI.equals("/user/sign-in")) {
+            doPost(req, resp);
+        } else {
+            Utils.methodNotAllowed(req, resp);
+        }
+    }
 }
